@@ -60,19 +60,19 @@ def display():
             piece_type = get_piece(row, file)
             piece_color = get_color(row, file)
 
-            if piece_type == piece.Type.PAWN.value:
-                print("P" if piece_color == piece.Color.WHITE.value else "p", end=" ")
-            if piece_type == piece.Type.KING.value:
-                print("K" if piece_color == piece.Color.WHITE.value else "k", end=" ")
-            if piece_type == piece.Type.QUEEN.value:
-                print("Q" if piece_color == piece.Color.WHITE.value else "q", end=" ")
-            if piece_type == piece.Type.ROOK.value:
-                print("R" if piece_color == piece.Color.WHITE.value else "r", end=" ")
-            if piece_type == piece.Type.KNIGHT.value:
-                print("N" if piece_color == piece.Color.WHITE.value else "n", end=" ")
-            if piece_type == piece.Type.BISHOP.value:
-                print("B" if piece_color == piece.Color.WHITE.value else "b", end=" ")
-            if piece_type == piece.Type.NONE.value:
+            if piece_type == piece.Type.PAWN:
+                print("P" if piece_color == piece.Color.WHITE else "p", end=" ")
+            if piece_type == piece.Type.KING:
+                print("K" if piece_color == piece.Color.WHITE else "k", end=" ")
+            if piece_type == piece.Type.QUEEN:
+                print("Q" if piece_color == piece.Color.WHITE else "q", end=" ")
+            if piece_type == piece.Type.ROOK:
+                print("R" if piece_color == piece.Color.WHITE else "r", end=" ")
+            if piece_type == piece.Type.KNIGHT:
+                print("N" if piece_color == piece.Color.WHITE else "n", end=" ")
+            if piece_type == piece.Type.BISHOP:
+                print("B" if piece_color == piece.Color.WHITE else "b", end=" ")
+            if piece_type == piece.Type.NONE:
                 print("  ", end="")
 
         print("")
@@ -83,12 +83,18 @@ def get_piece(row, file):
     Returns the piece at row and file
     """
 
-    return board[(row*8) + file]
+    if row > 7 or row < 0 or file > 7 or file < 0:
+        return piece.Type.NONE
+
+    return piece.Type(board[(row*8) + file])
 
 def set_piece(row, file, type=piece.Type.PAWN, color=piece.Color.WHITE):
     """
     Sets piece at row and file to type
     """
+
+    if row > 7 or row < 0 or file > 7 or file < 0:
+        return
 
     board[(row*8) + file] = type.value
     set_color(row, file, color)
@@ -98,12 +104,18 @@ def get_color(row, file):
     Gets color of piece at row and file
     """
 
-    return color[(row*8) + file]
+    if row > 7 or row < 0 or file > 7 or file < 0:
+        return piece.Color.NONE
+
+    return piece.Color(color[(row*8) + file])
 
 def set_color(row, file, new_color):
     """
     Sets color of piece at row and file to color
     """
+
+    if row > 7 or row < 0 or file > 7 or file < 0:
+        return
 
     color[(row*8) + file] = new_color.value
 
@@ -139,17 +151,17 @@ def move_piece(row, file, new_row, new_file):
                 set_piece(en_passant_victim[0], en_passant_victim[1], piece.Type.NONE, piece.Color.NONE)
 
             # Check if en passant can be done in the next move
-            if get_piece(new_row, new_file) == piece.Type.PAWN.value and abs(row-new_row) > 1:
+            if get_piece(new_row, new_file) == piece.Type.PAWN and abs(row-new_row) > 1:
                 en_passant_target = (
                     [new_row-1, new_file]
-                    if get_color(new_row, new_file) == piece.Color.WHITE.value else
+                    if get_color(new_row, new_file) == piece.Color.WHITE else
                     [new_row+1, new_file]
                 )
                 en_passant_victim = ([new_row, new_file])
                 found_en_passant = True
 
             # Check for promotion
-            if get_piece(new_row, new_file) == piece.Type.PAWN.value and (new_row == 7 or new_row == 0):
+            if get_piece(new_row, new_file) == piece.Type.PAWN and (new_row == 7 or new_row == 0):
                 set_piece(new_row, new_file, promotion_target, piece.Color(get_color(new_row, new_file)))
 
             result = 1
