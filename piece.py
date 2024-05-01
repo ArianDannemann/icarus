@@ -37,10 +37,26 @@ def get_valid_moves(row, file):
         valid_moves = get_pawn_moves(row, file, color)
 
     if piece == Type.BISHOP:
-        valid_moves.extend(get_bishop_moves(row, file, 1, 1, color))
-        valid_moves.extend(get_bishop_moves(row, file, 1, -1, color))
-        valid_moves.extend(get_bishop_moves(row, file, -1, -1, color))
-        valid_moves.extend(get_bishop_moves(row, file, -1, 1, color))
+        valid_moves.extend(get_line_move(row, file, 1, 1, color))
+        valid_moves.extend(get_line_move(row, file, 1, -1, color))
+        valid_moves.extend(get_line_move(row, file, -1, -1, color))
+        valid_moves.extend(get_line_move(row, file, -1, 1, color))
+
+    if piece == Type.ROOK:
+        valid_moves.extend(get_line_move(row, file, 0, 1, color))
+        valid_moves.extend(get_line_move(row, file, 0, -1, color))
+        valid_moves.extend(get_line_move(row, file, 1, 0, color))
+        valid_moves.extend(get_line_move(row, file, -1, 0, color))
+
+    if piece == Type.QUEEN:
+        valid_moves.extend(get_line_move(row, file, 1, 1, color))
+        valid_moves.extend(get_line_move(row, file, 1, -1, color))
+        valid_moves.extend(get_line_move(row, file, -1, -1, color))
+        valid_moves.extend(get_line_move(row, file, -1, 1, color))
+        valid_moves.extend(get_line_move(row, file, 0, 1, color))
+        valid_moves.extend(get_line_move(row, file, 0, -1, color))
+        valid_moves.extend(get_line_move(row, file, 1, 0, color))
+        valid_moves.extend(get_line_move(row, file, -1, 0, color))
 
     return valid_moves
 
@@ -76,7 +92,7 @@ def get_pawn_moves(row, file, color):
 
     return valid_moves
 
-def get_bishop_moves(row, file, dir_row, dir_file, color):
+def get_line_move(row, file, dir_row, dir_file, color):
     """
     Returns all valid positions for bishop at row and file in the direction of dir_row and dir_file
     For everystep in the line search we change row+=dir_row and file+=dir_file
