@@ -13,6 +13,8 @@ black_color = "#7d4a8d"
 square_width = 80
 square_height = 80
 
+selected_piece = [-1,-1]
+
 def init():
     """
     Initializes a tkinter window
@@ -58,12 +60,25 @@ def click_square(event_origin):
     Handles mous click event
     """
 
+    global selected_piece
+
     row, file = get_square()
 
-    piece = board.get_piece(row, file)
+    current_piece = board.get_piece(row, file)
     color = board.get_color(row, file)
 
-    print(f"Clicked {color.name} {piece.name}")
+    if (selected_piece[0] != -1):
+        result = board.move_piece(selected_piece[0], selected_piece[1], row, file)
+        selected_piece = [-1,-1]
+        print(f"move {result}")
+        update()
+        if result:
+            return
+
+    if (current_piece != piece.Type.NONE):
+        selected_piece = [row, file]
+
+        print(f"select {len(piece.get_valid_moves(row,file))}")
 
 def get_square():
     """
