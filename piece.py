@@ -58,11 +58,45 @@ def get_valid_moves(row, file):
         valid_moves.extend(get_line_move(row, file, 1, 0, color))
         valid_moves.extend(get_line_move(row, file, -1, 0, color))
 
+    if piece == Type.KING:
+        valid_moves.extend(get_king_moves(row, file, color))
+
+        # Remove moves that are now withing the bounds of the board
+    if piece == Type.PAWN or piece == Type.KNIGHT or piece == Type.KING:
+        i = 0
+        for valid_move in valid_moves:
+            i+=1
+            if valid_move[0] > 7 or valid_move[0] < 0 or valid_move[1] > 7 or valid_move[1] < 0:
+                valid_moves.pop(i)
+                i-=1
+
+    return valid_moves
+
+def get_king_moves(row, file, color):
+    """
+    Returns all valid positions for a king at row and file
+    Returns 2d array of rows and files: [ [row,file], ... ]
+    """
+    # TODO - castle
+
+    valid_moves = []
+
+    for off_x in range(-1, 2):
+        for off_y in range(-1, 2):
+
+            if off_x == 0 and off_y == 0:
+                continue
+
+            current_row = row + off_x
+            current_file = file + off_y
+
+            valid_moves.append([current_row, current_file]) if board.get_color(current_row, current_file) != color else None
+
     return valid_moves
 
 def get_pawn_moves(row, file, color):
     """
-    Returns all valid positions for pawn at row and file
+    Returns all valid positions for a pawn at row and file
     Returns 2d array of rows and files: [ [row,file], ... ]
     """
 
@@ -82,19 +116,11 @@ def get_pawn_moves(row, file, color):
     valid_moves.append(board.en_passant_target) if (board.en_passant_target[0] == row+1 and (board.en_passant_target[1] == file+1 or board.en_passant_target[1] == file-1) and color == Color.WHITE) else None
     valid_moves.append(board.en_passant_target) if (board.en_passant_target[0] == row-1 and (board.en_passant_target[1] == file+1 or board.en_passant_target[1] == file-1) and color == Color.BLACK) else None
 
-    # Remove moves that are now withing the bounds of the board
-    i = 0
-    for valid_move in valid_moves:
-        i+=1
-        if valid_move[0] > 7 or valid_move[0] < 0 or valid_move[1] > 7 or valid_move[1] < 0:
-            valid_moves.pop(i)
-            i-=1
-
     return valid_moves
 
 def get_line_move(row, file, dir_row, dir_file, color):
     """
-    Returns all valid positions for bishop at row and file in the direction of dir_row and dir_file
+    Returns all valid positions for piece at row and file in the direction of dir_row and dir_file
     For everystep in the line search we change row+=dir_row and file+=dir_file
     Returns 2d array of rows and files: [ [row,file], ... ]
     """
