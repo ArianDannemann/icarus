@@ -9,11 +9,13 @@ canvas = None
 title = "Icarus"
 white_color = "#9f90b0"
 black_color = "#7d4a8d"
+select_color = "#0000ff"
 
 square_width = 80
 square_height = 80
 
 selected_piece = [-1,-1]
+selected_moves = []
 
 def init():
     """
@@ -40,12 +42,18 @@ def update():
 
     global root
     global canvas
+    global selected_moves
 
     for row in range(0, 8):
         for file in range(0, 8):
 
             color = white_color if (row + file) % 2 == 0 else black_color
             text = f"{board.get_color(7-row, file).name}\n{board.get_piece(7-row, file).name}"
+
+            # Check if square is movable
+            for selected_move in selected_moves:
+                if selected_move[0] == 7-row and selected_move[1] == file:
+                    color = select_color
 
             x = file * square_width
             y = row * square_height
@@ -61,6 +69,7 @@ def click_square(event_origin):
     """
 
     global selected_piece
+    global selected_moves
 
     row, file = get_square()
 
@@ -70,13 +79,18 @@ def click_square(event_origin):
     if (selected_piece[0] != -1):
         result = board.move_piece(selected_piece[0], selected_piece[1], row, file)
         selected_piece = [-1,-1]
+        selected_moves = []
+
         print(f"move {result}")
         update()
+
         if result:
             return
 
     if (current_piece != piece.Type.NONE):
         selected_piece = [row, file]
+        selected_moves = piece.get_valid_moves(row,file)
+        update()
 
         print(f"select {len(piece.get_valid_moves(row,file))}")
 

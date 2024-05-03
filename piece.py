@@ -165,7 +165,7 @@ def get_line_move(row, file, dir_row, dir_file, color):
 
     for i in range(1, 8):
         current_row = row + (dir_row*i)
-        current_file = row + (dir_file*i)
+        current_file = file + (dir_file*i)
 
         if current_row > 7 or current_row < 0 or current_file > 7 or current_file < 0:
             break
