@@ -147,7 +147,7 @@ def move_piece(row, file, new_row, new_file):
             teleport_piece(row, file, new_row, new_file)
 
             # Check if en passant was done
-            if new_row == en_passant_target[0] and new_file == en_passant_target[1] and en_passant_valid:
+            if get_piece(row, file) == piece.Type.PAWN and new_row == en_passant_target[0] and new_file == en_passant_target[1] and en_passant_valid:
                 set_piece(en_passant_victim[0], en_passant_victim[1], piece.Type.NONE, piece.Color.NONE)
 
             # Check if en passant can be done in the next move
