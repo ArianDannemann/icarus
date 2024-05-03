@@ -133,7 +133,7 @@ def get_pawn_moves(row, file, color):
     direction = 1 if color == Color.WHITE else -1
     if board.get_piece(row+direction, file) == Type.NONE:
         valid_moves.append([row+direction, file])
-        valid_moves.append([row+(direction*2), file]) if board.get_piece(row+(direction*2), file) == Type.NONE else None
+        valid_moves.append([row+(direction*2), file]) if (board.get_piece(row+(direction*2), file) == Type.NONE and (row==1 if color == Color.WHITE else row==6)) else None
 
     # Taking a piece
     valid_moves.append([row+direction,file+direction]) if board.get_color(row+direction, file+direction) == Color.BLACK else None
