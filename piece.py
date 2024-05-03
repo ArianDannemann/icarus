@@ -85,11 +85,12 @@ def get_knight_moves(row, file, color):
 
     # Remove moves that are now withing the bounds of the board
     i = 0
-    for valid_move in valid_moves:
-        i+=1
-        if valid_move[0] > 7 or valid_move[0] < 0 or valid_move[1] > 7 or valid_move[1] < 0 or board.get_color(valid_move[0], valid_move[1]) == color:
+    while i < len(valid_moves):
+        if valid_moves[i][0] > 7 or valid_moves[i][0] < 0 or valid_moves[i][1] > 7 or valid_moves[i][1] < 0 or board.get_color(valid_moves[i][0], valid_moves[i][1]) == color:
             valid_moves.pop(i)
             i-=1
+
+        i+=1
 
     return valid_moves
 
@@ -99,6 +100,7 @@ def get_king_moves(row, file, color):
     Returns 2d array of rows and files: [ [row,file], ... ]
     """
     # TODO - castle
+    # TODO - checks
 
     valid_moves = []
 
@@ -143,11 +145,12 @@ def get_pawn_moves(row, file, color):
 
     # Remove moves that are now withing the bounds of the board
     i = 0
-    for valid_move in valid_moves:
-        i+=1
-        if valid_move[0] > 7 or valid_move[0] < 0 or valid_move[1] > 7 or valid_move[1] < 0:
+    while i < len(valid_moves):
+        if valid_moves[i][0] > 7 or valid_moves[i][0] < 0 or valid_moves[i][1] > 7 or valid_moves[i][1] < 0 or board.get_color(valid_moves[i][0], valid_moves[i][1]) == color:
             valid_moves.pop(i)
             i-=1
+
+        i+=1
 
     return valid_moves
 

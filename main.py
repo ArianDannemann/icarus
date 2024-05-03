@@ -1,7 +1,13 @@
 import board
 import piece
 
-board.set_piece(3,3,piece.Type.KNIGHT,piece.Color.WHITE)
-
+board.setup()
 board.display()
-print(f"Valid moves for knight: {len(piece.get_valid_moves(3,3))}")
+
+result = 0
+for row in range(0, 2):
+    for file in range(0, 8):
+        temp = len(piece.get_valid_moves(row,file))
+        result += temp
+
+print(f"Result: {result}")
