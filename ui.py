@@ -81,7 +81,6 @@ def click_square(event_origin):
         selected_piece = [-1,-1]
         selected_moves = []
 
-        print(f"move {result}")
         update()
 
         if result:
@@ -90,9 +89,8 @@ def click_square(event_origin):
     if (current_piece != piece.Type.NONE):
         selected_piece = [row, file]
         selected_moves = piece.get_valid_moves(row,file)
-        update()
 
-        print(f"select {len(piece.get_valid_moves(row,file))}")
+        update()
 
 def get_square():
     """

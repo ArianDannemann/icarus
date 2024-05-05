@@ -22,55 +22,80 @@ class Type(Enum):
     BISHOP  = 5
     KNIGHT  = 6
 
-def get_valid_moves(row, file):
+def get_valid_moves(row, file, simulate=True, b=None, c=None):
     """
     Returns all valid positions for piece at row and file
     Returns 2d array of rows and files: [ [row,file], ... ]
     """
 
-    piece = board.get_piece(row, file)
-    color = board.get_color(row, file)
+    b = b if b is not None else board.board
+    c = c if c is not None else board.color
+
+    piece = board.get_piece(row, file, b)
+    color = board.get_color(row, file, c)
 
     valid_moves = []
 
     if piece == Type.PAWN:
-        valid_moves = get_pawn_moves(row, file, color)
+        valid_moves = get_pawn_moves(row, file, color, c)
 
     if piece == Type.BISHOP:
-        valid_moves.extend(get_line_move(row, file, 1, 1, color))
-        valid_moves.extend(get_line_move(row, file, 1, -1, color))
-        valid_moves.extend(get_line_move(row, file, -1, -1, color))
-        valid_moves.extend(get_line_move(row, file, -1, 1, color))
+        valid_moves.extend(get_line_move(row, file, 1, 1, color, c))
+        valid_moves.extend(get_line_move(row, file, 1, -1, color, c))
+        valid_moves.extend(get_line_move(row, file, -1, -1, color, c))
+        valid_moves.extend(get_line_move(row, file, -1, 1, color, c))
 
     if piece == Type.ROOK:
-        valid_moves.extend(get_line_move(row, file, 0, 1, color))
-        valid_moves.extend(get_line_move(row, file, 0, -1, color))
-        valid_moves.extend(get_line_move(row, file, 1, 0, color))
-        valid_moves.extend(get_line_move(row, file, -1, 0, color))
+        valid_moves.extend(get_line_move(row, file, 0, 1, color, c))
+        valid_moves.extend(get_line_move(row, file, 0, -1, color, c))
+        valid_moves.extend(get_line_move(row, file, 1, 0, color, c))
+        valid_moves.extend(get_line_move(row, file, -1, 0, color, c))
 
     if piece == Type.QUEEN:
-        valid_moves.extend(get_line_move(row, file, 1, 1, color))
-        valid_moves.extend(get_line_move(row, file, 1, -1, color))
-        valid_moves.extend(get_line_move(row, file, -1, -1, color))
-        valid_moves.extend(get_line_move(row, file, -1, 1, color))
-        valid_moves.extend(get_line_move(row, file, 0, 1, color))
-        valid_moves.extend(get_line_move(row, file, 0, -1, color))
-        valid_moves.extend(get_line_move(row, file, 1, 0, color))
-        valid_moves.extend(get_line_move(row, file, -1, 0, color))
+        valid_moves.extend(get_line_move(row, file, 1, 1, color, c))
+        valid_moves.extend(get_line_move(row, file, 1, -1, color, c))
+        valid_moves.extend(get_line_move(row, file, -1, -1, color, c))
+        valid_moves.extend(get_line_move(row, file, -1, 1, color, c))
+        valid_moves.extend(get_line_move(row, file, 0, 1, color, c))
+        valid_moves.extend(get_line_move(row, file, 0, -1, color, c))
+        valid_moves.extend(get_line_move(row, file, 1, 0, color, c))
+        valid_moves.extend(get_line_move(row, file, -1, 0, color, c))
 
     if piece == Type.KING:
-        valid_moves.extend(get_king_moves(row, file, color))
+        valid_moves.extend(get_king_moves(row, file, color, c))
 
     if piece == Type.KNIGHT:
-        valid_moves.extend(get_knight_moves(row, file, color))
+        valid_moves.extend(get_knight_moves(row, file, color, c))
+
+    # Check if the move would place the king in check
+    if simulate:
+        i = 0
+        while i < len(valid_moves):
+            valid_move = valid_moves[i]
+            copied_board, copied_color = board.copy()
+            color = board.get_color(row, file, copied_color)
+            other_color = Color.WHITE if color == Color.BLACK else Color.BLACK
+
+            board.teleport_piece(row, file, valid_move[0], valid_move[1], copied_board, copied_color)
+
+            all_moves, result = get_all_moves(other_color, copied_board, copied_color)
+
+            if result:
+                valid_moves.pop(i)
+                i-=1
+
+            i+=1
 
     return valid_moves
 
-def get_knight_moves(row, file, color):
+def get_knight_moves(row, file, color=None, c=None):
     """
     Returns all valid positions for a knight at row and file
     Returns 2d array of rows and files: [ [row,file], ... ]
     """
+
+    c = c if c is not None else board.color
+    color = board.get_color(row, file, c) if color is None else color
 
     valid_moves = [
         [row+2,file+1],
@@ -86,7 +111,7 @@ def get_knight_moves(row, file, color):
     # Remove moves that are now withing the bounds of the board
     i = 0
     while i < len(valid_moves):
-        if valid_moves[i][0] > 7 or valid_moves[i][0] < 0 or valid_moves[i][1] > 7 or valid_moves[i][1] < 0 or board.get_color(valid_moves[i][0], valid_moves[i][1]) == color:
+        if valid_moves[i][0] > 7 or valid_moves[i][0] < 0 or valid_moves[i][1] > 7 or valid_moves[i][1] < 0 or board.get_color(valid_moves[i][0], valid_moves[i][1], c) == color:
             valid_moves.pop(i)
             i-=1
 
@@ -94,13 +119,16 @@ def get_knight_moves(row, file, color):
 
     return valid_moves
 
-def get_king_moves(row, file, color):
+def get_king_moves(row, file, color=None, c=None):
     """
     Returns all valid positions for a king at row and file
     Returns 2d array of rows and files: [ [row,file], ... ]
     """
     # TODO - castle
     # TODO - checks
+
+    c = c if c is not None else board.color
+    color = board.get_color(row, file, c) if color is None else color
 
     valid_moves = []
 
@@ -116,28 +144,31 @@ def get_king_moves(row, file, color):
             if current_row > 7 or current_row < 0 or current_file > 7 or current_file < 0:
                 continue
 
-            valid_moves.append([current_row, current_file]) if board.get_color(current_row, current_file) != color else None
+            valid_moves.append([current_row, current_file]) if board.get_color(current_row, current_file, c) != color else None
 
     return valid_moves
 
-def get_pawn_moves(row, file, color):
+def get_pawn_moves(row, file, color=None, c=None):
     """
     Returns all valid positions for a pawn at row and file
     Returns 2d array of rows and files: [ [row,file], ... ]
     """
     # TODO - simplify
 
+    c = c if c is not None else board.color
+    color = color if color is not None else board.get_color(row, file, c)
+
     valid_moves = []
 
     # Normal move
     direction = 1 if color == Color.WHITE else -1
-    if board.get_piece(row+direction, file) == Type.NONE:
+    if board.get_color(row+direction, file, c) == Color.NONE:
         valid_moves.append([row+direction, file])
-        valid_moves.append([row+(direction*2), file]) if (board.get_piece(row+(direction*2), file) == Type.NONE and (row==1 if color == Color.WHITE else row==6)) else None
+        valid_moves.append([row+(direction*2), file]) if (board.get_color(row+(direction*2), file, c) == Color.NONE and (row==1 if color == Color.WHITE else row==6)) else None
 
     # Taking a piece
-    valid_moves.append([row+direction,file+direction]) if board.get_color(row+direction, file+direction) == Color.BLACK else None
-    valid_moves.append([row+direction,file-direction]) if board.get_color(row+direction, file-direction) == Color.BLACK else None
+    valid_moves.append([row+direction,file+direction]) if board.get_color(row+direction, file+direction, c) == Color.BLACK else None
+    valid_moves.append([row+direction,file-direction]) if board.get_color(row+direction, file-direction, c) == Color.BLACK else None
 
     # En passant
     valid_moves.append(board.en_passant_target) if (board.en_passant_target[0] == row+1 and (board.en_passant_target[1] == file+1 or board.en_passant_target[1] == file-1) and color == Color.WHITE) else None
@@ -149,17 +180,19 @@ def get_pawn_moves(row, file, color):
         if valid_moves[i][0] > 7 or valid_moves[i][0] < 0 or valid_moves[i][1] > 7 or valid_moves[i][1] < 0 or board.get_color(valid_moves[i][0], valid_moves[i][1]) == color:
             valid_moves.pop(i)
             i-=1
-
         i+=1
 
     return valid_moves
 
-def get_line_move(row, file, dir_row, dir_file, color):
+def get_line_move(row, file, dir_row, dir_file, color=None, c=None):
     """
     Returns all valid positions for piece at row and file in the direction of dir_row and dir_file
     For everystep in the line search we change row+=dir_row and file+=dir_file
     Returns 2d array of rows and files: [ [row,file], ... ]
     """
+
+    c = c if c is not None else board.color
+    color = board.get_color(row, file, c) if color is None else color
 
     valid_moves = []
 
@@ -170,7 +203,7 @@ def get_line_move(row, file, dir_row, dir_file, color):
         if current_row > 7 or current_row < 0 or current_file > 7 or current_file < 0:
             break
 
-        current_color = board.get_color(current_row, current_file)
+        current_color = board.get_color(current_row, current_file, c)
 
         if current_color != color:
             valid_moves.append([current_row, current_file])
@@ -179,3 +212,34 @@ def get_line_move(row, file, dir_row, dir_file, color):
             break
 
     return valid_moves
+
+# NOTE - active_board and active_color should be board.board and board.color
+#        the None attribute was set to prevent circular imports
+def get_all_moves(color, b=None, c=None):
+    """
+    Returns all valid moves for all pieces of a certain color
+    Returns 2d array of rows and files: [ [row,file], ... ]
+    Also returns true if the enemy king is in check, false if otherwise
+    """
+
+    b = b if b is not None else board.board
+    c = c if c is not None else board.color
+
+    valid_moves = []
+    enemy_in_check = False
+
+    for row in range(0, 8):
+        for file in range(0, 8):
+
+            if board.get_color(row, file, c) != color:
+                continue
+
+            piece_moves = get_valid_moves(row, file, False, b, c)
+            valid_moves.extend(piece_moves)
+
+            # Check if we are checking the king
+            for piece_move in piece_moves:
+                if board.get_color(piece_move[0], piece_move[1], c) != color and board.get_piece(piece_move[0], piece_move[1], b) == Type.KING:
+                    enemy_in_check = True
+
+    return valid_moves, enemy_in_check

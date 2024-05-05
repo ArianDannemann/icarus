@@ -78,7 +78,7 @@ def display():
         print("")
     print("\n     0 1 2 3 4 5 6 7")
 
-def get_piece(row, file):
+def get_piece(row, file, b=board):
     """
     Returns the piece at row and file
     """
@@ -86,9 +86,9 @@ def get_piece(row, file):
     if row > 7 or row < 0 or file > 7 or file < 0:
         return piece.Type.NONE
 
-    return piece.Type(board[(row*8) + file])
+    return piece.Type(b[(row*8) + file])
 
-def set_piece(row, file, type=piece.Type.PAWN, color=piece.Color.WHITE):
+def set_piece(row, file, type=piece.Type.PAWN, color=piece.Color.WHITE, b=board, c=color):
     """
     Sets piece at row and file to type
     """
@@ -96,10 +96,10 @@ def set_piece(row, file, type=piece.Type.PAWN, color=piece.Color.WHITE):
     if row > 7 or row < 0 or file > 7 or file < 0:
         return
 
-    board[(row*8) + file] = type.value
-    set_color(row, file, color)
+    b[(row*8) + file] = type.value
+    set_color(row, file, color, c)
 
-def get_color(row, file):
+def get_color(row, file, c=color):
     """
     Gets color of piece at row and file
     """
@@ -107,9 +107,9 @@ def get_color(row, file):
     if row > 7 or row < 0 or file > 7 or file < 0:
         return piece.Color.NONE
 
-    return piece.Color(color[(row*8) + file])
+    return piece.Color(c[(row*8) + file])
 
-def set_color(row, file, new_color):
+def set_color(row, file, new_color, c=color):
     """
     Sets color of piece at row and file to color
     """
@@ -117,23 +117,24 @@ def set_color(row, file, new_color):
     if row > 7 or row < 0 or file > 7 or file < 0:
         return
 
-    color[(row*8) + file] = new_color.value
+    c[(row*8) + file] = new_color.value
 
-def teleport_piece(row, file, new_row, new_file):
+def teleport_piece(row, file, new_row, new_file, b=board, c=color):
     """
     Teleports piece from row and file to new_row and new_file
     while ignoring all chess rules
     """
 
-    set_piece(new_row, new_file, piece.Type(get_piece(row, file)), piece.Color(get_color(row, file)))
-    set_piece(row, file, piece.Type.NONE, piece.Color.NONE)
+    set_piece(new_row, new_file, piece.Type(get_piece(row, file, b)), piece.Color(get_color(row, file, c)), b, c)
+    set_piece(row, file, piece.Type.NONE, piece.Color.NONE, b, c)
 
-def move_piece(row, file, new_row, new_file):
+def move_piece(row, file, new_row, new_file, b=board, c=color):
     """
     Moves piece from row and file to new_row and new_file
     according to chess rules
     Returns 1 if move was legal, 0 otherwise
     """
+
     global en_passant_target
     global en_passant_victim
     global en_passant_valid
@@ -144,27 +145,35 @@ def move_piece(row, file, new_row, new_file):
 
     for valid_move in piece.get_valid_moves(row, file):
         if valid_move[0] == new_row and valid_move[1] == new_file:
-            teleport_piece(row, file, new_row, new_file)
+            teleport_piece(row, file, new_row, new_file, b, c)
 
             # Check if en passant was done
-            if get_piece(row, file) == piece.Type.PAWN and new_row == en_passant_target[0] and new_file == en_passant_target[1] and en_passant_valid:
-                set_piece(en_passant_victim[0], en_passant_victim[1], piece.Type.NONE, piece.Color.NONE)
+            if get_piece(new_row, new_file, b) == piece.Type.PAWN and new_row == en_passant_target[0] and new_file == en_passant_target[1] and en_passant_valid:
+                set_piece(en_passant_victim[0], en_passant_victim[1], piece.Type.NONE, piece.Color.NONE, b, c)
 
             # Check if en passant can be done in the next move
-            if get_piece(new_row, new_file) == piece.Type.PAWN and abs(row-new_row) > 1:
+            if get_piece(new_row, new_file, b) == piece.Type.PAWN and abs(row-new_row) > 1:
                 en_passant_target = (
                     [new_row-1, new_file]
-                    if get_color(new_row, new_file) == piece.Color.WHITE else
+                    if get_color(new_row, new_file, c) == piece.Color.WHITE else
                     [new_row+1, new_file]
                 )
                 en_passant_victim = ([new_row, new_file])
                 found_en_passant = True
 
             # Check for promotion
-            if get_piece(new_row, new_file) == piece.Type.PAWN and (new_row == 7 or new_row == 0):
-                set_piece(new_row, new_file, promotion_target, piece.Color(get_color(new_row, new_file)))
+            if get_piece(new_row, new_file, b) == piece.Type.PAWN and (new_row == 7 or new_row == 0):
+                set_piece(new_row, new_file, promotion_target, piece.Color(get_color(new_row, new_file, b)), b, c)
 
             result = 1
 
+
     en_passant_valid = (result == 1 and found_en_passant)
     return result
+
+def copy(b=board, c=color):
+    """
+    Returns a copy of board and color arrays
+    """
+
+    return b.copy(), c.copy()
