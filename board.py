@@ -1,3 +1,7 @@
+"""
+Handles piece positioning and moving on a board
+"""
+
 import piece
 
 board = [ 0 ] * 64

@@ -1,3 +1,7 @@
+"""
+Icarus user interface
+"""
+
 import tkinter as tk
 
 import board

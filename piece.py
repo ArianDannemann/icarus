@@ -1,3 +1,7 @@
+"""
+Handles rules for pieces
+"""
+
 from enum import Enum
 
 import board
@@ -78,7 +82,7 @@ def get_valid_moves(row, file, simulate=True, b=None, c=None):
 
             board.teleport_piece(row, file, valid_move[0], valid_move[1], copied_board, copied_color)
 
-            all_moves, result = get_all_moves(other_color, copied_board, copied_color)
+            _, result = get_all_moves(other_color, copied_board, copied_color)
 
             if result:
                 valid_moves.pop(i)
