@@ -3,6 +3,7 @@ Icarus user interface
 """
 
 import tkinter as tk
+from PIL import Image, ImageTk
 
 import board
 import piece
@@ -21,6 +22,8 @@ square_height = 80
 selected_piece = [-1,-1]
 selected_moves = []
 
+piece_images = []
+
 def init():
     """
     Initializes a tkinter window
@@ -37,6 +40,7 @@ def init():
 
     root.bind("<Button 1>", click_square)
 
+    load_piece_images()
     update()
 
 def update():
@@ -47,6 +51,9 @@ def update():
     global root
     global canvas
     global selected_moves
+    global piece_images
+
+    canvas.delete("all")
 
     for row in range(0, 8):
         for file in range(0, 8):
@@ -65,7 +72,55 @@ def update():
             canvas.create_rectangle((x, y), (x+square_height, y+square_width), fill=color)
 
             if board.get_color(7-row, file) != piece.Color.NONE:
-                canvas.create_text(x + square_width / 2, y + square_height / 2, text=text, fill="black")
+                #canvas.create_text(x + square_width / 2, y + square_height / 2, text=text, fill="black")
+                canvas.create_image(
+                        x,
+                        y,
+                        anchor=tk.NW,
+                        image=get_piece_image(
+                            board.get_piece(7-row, file),
+                            board.get_color(7-row, file)
+                        )
+                )
+
+def get_piece_image(current_piece, current_color):
+    """
+    Gets the corresponding image to a piece of color
+    """
+
+    global piece_images
+
+    if current_color == piece.Color.WHITE:
+        return piece_images[current_piece.value-1]
+    elif current_color == piece.Color.BLACK:
+        return piece_images[(current_piece.value-1)+6]
+
+def load_piece_images():
+    """
+    Pre-loads alls piece images into memory
+    """
+
+    global piece_images
+
+    piece_images.append(load_piece_image("w_p"))
+    piece_images.append(load_piece_image("w_k"))
+    piece_images.append(load_piece_image("w_q"))
+    piece_images.append(load_piece_image("w_r"))
+    piece_images.append(load_piece_image("w_b"))
+    piece_images.append(load_piece_image("w_n"))
+    piece_images.append(load_piece_image("b_p"))
+    piece_images.append(load_piece_image("b_k"))
+    piece_images.append(load_piece_image("b_q"))
+    piece_images.append(load_piece_image("b_r"))
+    piece_images.append(load_piece_image("b_b"))
+    piece_images.append(load_piece_image("b_n"))
+
+def load_piece_image(name):
+    """
+    Loads a single piece image from resources/pieces/ into memory
+    """
+
+    return ImageTk.PhotoImage(Image.open(f"./resources/pieces/{name}.png").resize((square_width, square_height)).convert("RGBA"))
 
 def click_square(event_origin):
     """
