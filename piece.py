@@ -5,6 +5,7 @@ Handles rules for pieces
 from enum import Enum
 
 import board
+import position
 
 class Color(Enum):
     """
@@ -164,24 +165,38 @@ def get_pawn_moves(row, file, color=None, c=None):
 
     valid_moves = []
 
-    # Normal move
     direction = 1 if color == Color.WHITE else -1
-    if board.get_color(row+direction, file, c) == Color.NONE:
-        valid_moves.append([row+direction, file])
-        valid_moves.append([row+(direction*2), file]) if (board.get_color(row+(direction*2), file, c) == Color.NONE and (row==1 if color == Color.WHITE else row==6)) else None
+    step_one        = [ row+direction, file ]
+    step_two        = [ row+(direction*2), file ]
+    attack_left     = [ row+direction, file+1 ]
+    attack_right    = [ row+direction, file-1]
+
+    # Normal move
+    if board.get_color(step_one[0], step_one[1], c) == Color.NONE:
+        valid_moves.append(step_one)
+
+        # First row move
+        if (board.get_color(step_two[0], step_two[1], c) == Color.NONE
+        and (row==1 if color == Color.WHITE else row==6)):
+            valid_moves.append(step_two)
 
     # Taking a piece
-    valid_moves.append([row+direction,file+direction]) if board.get_color(row+direction, file+direction, c) == Color.BLACK else None
-    valid_moves.append([row+direction,file-direction]) if board.get_color(row+direction, file-direction, c) == Color.BLACK else None
+    if board.get_color(attack_left[0], attack_left[1], c) not in (color, Color.NONE):
+        valid_moves.append(attack_left)
+    if board.get_color(attack_right[0], attack_right[1], c) not in (color, Color.NONE):
+        valid_moves.append(attack_right)
 
     # En passant
-    valid_moves.append(board.en_passant_target) if (board.en_passant_target[0] == row+1 and (board.en_passant_target[1] == file+1 or board.en_passant_target[1] == file-1) and color == Color.WHITE) else None
-    valid_moves.append(board.en_passant_target) if (board.en_passant_target[0] == row-1 and (board.en_passant_target[1] == file+1 or board.en_passant_target[1] == file-1) and color == Color.BLACK) else None
+    if position.equals(board.en_passant_target, attack_left):
+        valid_moves.append(board.en_passant_target)
+    if position.equals(board.en_passant_target, attack_right):
+        valid_moves.append(board.en_passant_target)
 
     # Remove moves that are now withing the bounds of the board
     i = 0
     while i < len(valid_moves):
-        if valid_moves[i][0] > 7 or valid_moves[i][0] < 0 or valid_moves[i][1] > 7 or valid_moves[i][1] < 0 or board.get_color(valid_moves[i][0], valid_moves[i][1]) == color:
+        same_color = board.get_color(valid_moves[i][0], valid_moves[i][1]) == color
+        if not position.is_in_bounds(valid_moves[i]) or same_color:
             valid_moves.pop(i)
             i-=1
         i+=1
