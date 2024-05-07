@@ -1,10 +1,10 @@
 """
-Handles rules for pieces
+Holds the classes Piece, Color and Type
 """
 
 from enum import Enum
 
-import board
+from board import Board
 import position
 
 class Color(Enum):
@@ -27,261 +27,263 @@ class Type(Enum):
     BISHOP  = 5
     KNIGHT  = 6
 
-def get_valid_moves(row, file, simulate=True, b=None, c=None):
+class Piece():
     """
-    Returns all valid positions for piece at row and file
-    Returns 2d array of rows and files: [ [row,file], ... ]
+    Handles rules for pieces
     """
 
-    b = b if b is not None else board.board
-    c = c if c is not None else board.color
+    def get_valid_moves(self, row, file, simulate, board):
+        """
+        Returns all valid positions for piece at row and file
+        Returns 2d array of rows and files: [ [row,file], ... ]
+        """
 
-    piece = board.get_piece(row, file, b)
-    color = board.get_color(row, file, c)
+        piece = board.get_piece(row, file)
+        color = board.get_color(row, file)
 
-    valid_moves = []
+        valid_moves = []
 
-    if piece == Type.PAWN:
-        valid_moves = get_pawn_moves(row, file, color, c)
+        if piece == Type.PAWN:
+            valid_moves = board.get_pawn_moves(row, file, color)
 
-    if piece == Type.BISHOP:
-        valid_moves.extend(get_line_move(row, file, 1, 1, color, c))
-        valid_moves.extend(get_line_move(row, file, 1, -1, color, c))
-        valid_moves.extend(get_line_move(row, file, -1, -1, color, c))
-        valid_moves.extend(get_line_move(row, file, -1, 1, color, c))
+        if piece == Type.BISHOP:
+            valid_moves.extend(board.get_line_move(row, file, 1, 1, color))
+            valid_moves.extend(board.get_line_move(row, file, 1, -1, color))
+            valid_moves.extend(board.get_line_move(row, file, -1, -1, color))
+            valid_moves.extend(board.get_line_move(row, file, -1, 1, color))
 
-    if piece == Type.ROOK:
-        valid_moves.extend(get_line_move(row, file, 0, 1, color, c))
-        valid_moves.extend(get_line_move(row, file, 0, -1, color, c))
-        valid_moves.extend(get_line_move(row, file, 1, 0, color, c))
-        valid_moves.extend(get_line_move(row, file, -1, 0, color, c))
+        if piece == Type.ROOK:
+            valid_moves.extend(board.get_line_move(row, file, 0, 1, color))
+            valid_moves.extend(board.get_line_move(row, file, 0, -1, color))
+            valid_moves.extend(board.get_line_move(row, file, 1, 0, color))
+            valid_moves.extend(board.get_line_move(row, file, -1, 0, color))
 
-    if piece == Type.QUEEN:
-        valid_moves.extend(get_line_move(row, file, 1, 1, color, c))
-        valid_moves.extend(get_line_move(row, file, 1, -1, color, c))
-        valid_moves.extend(get_line_move(row, file, -1, -1, color, c))
-        valid_moves.extend(get_line_move(row, file, -1, 1, color, c))
-        valid_moves.extend(get_line_move(row, file, 0, 1, color, c))
-        valid_moves.extend(get_line_move(row, file, 0, -1, color, c))
-        valid_moves.extend(get_line_move(row, file, 1, 0, color, c))
-        valid_moves.extend(get_line_move(row, file, -1, 0, color, c))
+        if piece == Type.QUEEN:
+            valid_moves.extend(board.get_line_move(row, file, 1, 1, color))
+            valid_moves.extend(board.get_line_move(row, file, 1, -1, color))
+            valid_moves.extend(board.get_line_move(row, file, -1, -1, color))
+            valid_moves.extend(board.get_line_move(row, file, -1, 1, color))
+            valid_moves.extend(board.get_line_move(row, file, 0, 1, color))
+            valid_moves.extend(board.get_line_move(row, file, 0, -1, color))
+            valid_moves.extend(board.get_line_move(row, file, 1, 0, color))
+            valid_moves.extend(board.get_line_move(row, file, -1, 0, color))
 
-    if piece == Type.KING:
-        valid_moves.extend(get_king_moves(row, file, color, b, c, simulate))
+        if piece == Type.KING:
+            valid_moves.extend(board.get_king_moves(row, file, board, simulate))
 
-    if piece == Type.KNIGHT:
-        valid_moves.extend(get_knight_moves(row, file, color, c))
+        if piece == Type.KNIGHT:
+            valid_moves.extend(board.get_knight_moves(row, file, board))
 
-    # Check if the move would place the king in check
-    if simulate:
+        # Check if the move would place the king in check
+        if simulate:
+            i = 0
+            while i < len(valid_moves):
+                valid_move = valid_moves[i]
+                copied_board = Board()
+                copied_board.board, copied_board.color = board.copy()
+                color = copied_board.get_color(row, file)
+                other_color = Color.WHITE if color == Color.BLACK else Color.BLACK
+
+                copied_board.teleport_piece(
+                        row,
+                        file,
+                        valid_move[0],
+                        valid_move[1]
+                )
+
+                _, result = self.get_all_moves(other_color, board)
+
+                if result:
+                    valid_moves.pop(i)
+                    i-=1
+
+                i+=1
+
+        return valid_moves
+
+    def get_knight_moves(self, row, file, board):
+        """
+        Returns all valid positions for a knight at row and file
+        Returns 2d array of rows and files: [ [row,file], ... ]
+        """
+
+        color = board.get_color(row, file)
+
+        valid_moves = [
+            [row+2,file+1],
+            [row+2,file-1],
+            [row-2,file+1],
+            [row-2,file-1],
+            [row+1,file+2],
+            [row-1,file+2],
+            [row+1,file-2],
+            [row-1,file-2],
+        ]
+
+        # Remove moves that are now withing the bounds of the board
         i = 0
         while i < len(valid_moves):
-            valid_move = valid_moves[i]
-            copied_board, copied_color = board.copy()
-            color = board.get_color(row, file, copied_color)
-            other_color = Color.WHITE if color == Color.BLACK else Color.BLACK
-
-            board.teleport_piece(row, file, valid_move[0], valid_move[1], copied_board, copied_color)
-
-            _, result = get_all_moves(other_color, copied_board, copied_color)
-
-            if result:
+            if (not position.is_in_bounds(valid_moves[i])
+            or board.get_color(valid_moves[i][0], valid_moves[i][1]) == color):
                 valid_moves.pop(i)
                 i-=1
 
             i+=1
 
-    return valid_moves
+        return valid_moves
 
-def get_knight_moves(row, file, color=None, c=None):
-    """
-    Returns all valid positions for a knight at row and file
-    Returns 2d array of rows and files: [ [row,file], ... ]
-    """
+    def get_king_moves(self, row, file, board, can_castle=True):
+        """
+        Returns all valid positions for a king at row and file
+        Returns 2d array of rows and files: [ [row,file], ... ]
+        """
 
-    c = c if c is not None else board.color
-    color = board.get_color(row, file, c) if color is None else color
+        valid_moves = []
+        color = board.get_color(row, file)
+        enemy_color = Color.WHITE if color == Color.BLACK else Color.BLACK
+        castle_info = board.white_castle_info if color == Color.WHITE else board.black_castle_info
 
-    valid_moves = [
-        [row+2,file+1],
-        [row+2,file-1],
-        [row-2,file+1],
-        [row-2,file-1],
-        [row+1,file+2],
-        [row-1,file+2],
-        [row+1,file-2],
-        [row-1,file-2],
-    ]
+        for off_x in range(-1, 2):
+            for off_y in range(-1, 2):
 
-    # Remove moves that are now withing the bounds of the board
-    i = 0
-    while i < len(valid_moves):
-        if not position.is_in_bounds(valid_moves[i]) or board.get_color(valid_moves[i][0], valid_moves[i][1], c) == color:
-            valid_moves.pop(i)
-            i-=1
+                if off_x == 0 and off_y == 0:
+                    continue
 
-        i+=1
+                current_row = row + off_x
+                current_file = file + off_y
 
-    return valid_moves
+                if not position.is_in_bounds([current_row, current_file]):
+                    continue
 
-def get_king_moves(row, file, color=None, b=None, c=None, can_castle=True):
-    """
-    Returns all valid positions for a king at row and file
-    Returns 2d array of rows and files: [ [row,file], ... ]
-    """
+                if board.get_color(current_row, current_file) != color:
+                    valid_moves.append([current_row, current_file])
 
-    b = b if b is not None else board.board
-    c = c if c is not None else board.color
-    color = board.get_color(row, file, c) if color is None else color
+        # NOTE - it does not matter here that we use board instead of b
+        #        since we dont castle in simulation (we cant take the king through castles)
+        # Check for castling
+        if not castle_info[0] and can_castle:
+            enemy_moves, in_check = self.get_all_moves(enemy_color, board)
 
-    valid_moves = []
+            if in_check:
+                return valid_moves
 
-    for off_x in range(-1, 2):
-        for off_y in range(-1, 2):
+            if (not castle_info[1]
+            and [row,file-1] not in enemy_moves
+            and [row,file-2] not in enemy_moves
+            and board.get_piece(row, file-1) == Type.NONE
+            and board.get_piece(row, file-2) == Type.NONE):
+                valid_moves.append([row,file-2])
 
-            if off_x == 0 and off_y == 0:
-                continue
+            if (not castle_info[2]
+            and [row,file+1] not in enemy_moves
+            and [row,file+2] not in enemy_moves
+            and board.get_piece(row, file+1) == Type.NONE
+            and board.get_piece(row, file+2) == Type.NONE):
+                valid_moves.append([row,file+2])
 
-            current_row = row + off_x
-            current_file = file + off_y
+        return valid_moves
+
+    def get_pawn_moves(self, row, file, board):
+        """
+        Returns all valid positions for a pawn at row and file
+        Returns 2d array of rows and files: [ [row,file], ... ]
+        """
+
+        valid_moves = []
+        color = board.get_color(row, file)
+
+        direction = 1 if color == Color.WHITE else -1
+        step_one        = [ row+direction, file ]
+        step_two        = [ row+(direction*2), file ]
+        attack_left     = [ row+direction, file+1 ]
+        attack_right    = [ row+direction, file-1]
+
+        # Normal move
+        if board.get_color(step_one[0], step_one[1]) == Color.NONE:
+            valid_moves.append(step_one)
+
+            # First row move
+            if (board.get_color(step_two[0], step_two[1]) == Color.NONE
+            and (row==1 if color == Color.WHITE else row==6)):
+                valid_moves.append(step_two)
+
+        # Taking a piece
+        if board.get_color(attack_left[0], attack_left[1]) not in (color, Color.NONE):
+            valid_moves.append(attack_left)
+        if board.get_color(attack_right[0], attack_right[1]) not in (color, Color.NONE):
+            valid_moves.append(attack_right)
+
+        # En passant
+        if position.equals(board.en_passant_target, attack_left):
+            valid_moves.append(board.en_passant_target)
+        if position.equals(board.en_passant_target, attack_right):
+            valid_moves.append(board.en_passant_target)
+
+        # Remove moves that are now withing the bounds of the board
+        i = 0
+        while i < len(valid_moves):
+            if (not position.is_in_bounds(valid_moves[i])
+            or board.get_color(valid_moves[i][0], valid_moves[i][1]) == color):
+                valid_moves.pop(i)
+                i-=1
+            i+=1
+
+        return valid_moves
+
+    def get_line_move(self, row, file, direction, board):
+        """
+        Returns all valid positions for piece at row and file in
+        the direction of dir_row and dir_file
+        For everystep in the line search we change row+=dir_row and file+=dir_file
+        Returns 2d array of rows and files: [ [row,file], ... ]
+        """
+
+        color = board.get_color(row, file)
+
+        valid_moves = []
+
+        for i in range(1, 8):
+            current_row = row + (direction[0]*i)
+            current_file = file + (direction[1]*i)
 
             if not position.is_in_bounds([current_row, current_file]):
-                continue
+                break
 
-            if board.get_color(current_row, current_file, c) != color:
+            current_color = board.get_color(current_row, current_file)
+
+            if current_color != color:
                 valid_moves.append([current_row, current_file])
 
-    # NOTE - it does not matter here that we use board instead of b
-    #        since we dont castle in simulation (we cant take the king through castles)
-    # Check for castling
-    castle_info = board.white_castle_info if color == Color.WHITE else board.black_castle_info
-    if not castle_info[0] and can_castle:
-        enemy_moves, in_check = get_all_moves(Color.WHITE if color == Color.BLACK else Color.BLACK, b, c)
+            if current_color != Color.NONE:
+                break
 
-        if in_check:
-            return valid_moves
+        return valid_moves
 
-        if (not castle_info[1]
-        and [row,file-1] not in enemy_moves
-        and [row,file-2] not in enemy_moves
-        and board.get_piece(row, file-1, b) == Type.NONE
-        and board.get_piece(row, file-2, b) == Type.NONE):
-            valid_moves.append([row,file-2])
+    # NOTE - active_board and active_color should be board.board and board.color
+    #        the None attribute was set to prevent circular imports
+    def get_all_moves(self, color, board):
+        """
+        Returns all valid moves for all pieces of a certain color
+        Returns 2d array of rows and files: [ [row,file], ... ]
+        Also returns true if the enemy king is in check, false if otherwise
+        """
 
-        if (not castle_info[2]
-        and [row,file+1] not in enemy_moves
-        and [row,file+2] not in enemy_moves
-        and board.get_piece(row, file+1, b) == Type.NONE
-        and board.get_piece(row, file+2, b) == Type.NONE):
-            valid_moves.append([row,file+2])
+        valid_moves = []
+        enemy_in_check = False
 
-    return valid_moves
+        for row in range(0, 8):
+            for file in range(0, 8):
 
-def get_pawn_moves(row, file, color=None, c=None):
-    """
-    Returns all valid positions for a pawn at row and file
-    Returns 2d array of rows and files: [ [row,file], ... ]
-    """
+                if board.get_color(row, file) != color:
+                    continue
 
-    c = c if c is not None else board.color
-    color = color if color is not None else board.get_color(row, file, c)
+                piece_moves = self.get_valid_moves(row, file, False, board)
+                valid_moves.extend(piece_moves)
 
-    valid_moves = []
+                # Check if we are checking the king
+                for piece_move in piece_moves:
+                    if (board.get_color(piece_move[0], piece_move[1]) != color
+                    and board.get_piece(piece_move[0], piece_move[1]) == Type.KING):
+                        enemy_in_check = True
 
-    direction = 1 if color == Color.WHITE else -1
-    step_one        = [ row+direction, file ]
-    step_two        = [ row+(direction*2), file ]
-    attack_left     = [ row+direction, file+1 ]
-    attack_right    = [ row+direction, file-1]
-
-    # Normal move
-    if board.get_color(step_one[0], step_one[1], c) == Color.NONE:
-        valid_moves.append(step_one)
-
-        # First row move
-        if (board.get_color(step_two[0], step_two[1], c) == Color.NONE
-        and (row==1 if color == Color.WHITE else row==6)):
-            valid_moves.append(step_two)
-
-    # Taking a piece
-    if board.get_color(attack_left[0], attack_left[1], c) not in (color, Color.NONE):
-        valid_moves.append(attack_left)
-    if board.get_color(attack_right[0], attack_right[1], c) not in (color, Color.NONE):
-        valid_moves.append(attack_right)
-
-    # En passant
-    if position.equals(board.en_passant_target, attack_left):
-        valid_moves.append(board.en_passant_target)
-    if position.equals(board.en_passant_target, attack_right):
-        valid_moves.append(board.en_passant_target)
-
-    # Remove moves that are now withing the bounds of the board
-    i = 0
-    while i < len(valid_moves):
-        if (not position.is_in_bounds(valid_moves[i])
-        or board.get_color(valid_moves[i][0], valid_moves[i][1]) == color):
-            valid_moves.pop(i)
-            i-=1
-        i+=1
-
-    return valid_moves
-
-def get_line_move(row, file, dir_row, dir_file, color=None, c=None):
-    """
-    Returns all valid positions for piece at row and file in the direction of dir_row and dir_file
-    For everystep in the line search we change row+=dir_row and file+=dir_file
-    Returns 2d array of rows and files: [ [row,file], ... ]
-    """
-
-    c = c if c is not None else board.color
-    color = board.get_color(row, file, c) if color is None else color
-
-    valid_moves = []
-
-    for i in range(1, 8):
-        current_row = row + (dir_row*i)
-        current_file = file + (dir_file*i)
-
-        if current_row > 7 or current_row < 0 or current_file > 7 or current_file < 0:
-            break
-
-        current_color = board.get_color(current_row, current_file, c)
-
-        if current_color != color:
-            valid_moves.append([current_row, current_file])
-
-        if current_color != Color.NONE:
-            break
-
-    return valid_moves
-
-# NOTE - active_board and active_color should be board.board and board.color
-#        the None attribute was set to prevent circular imports
-def get_all_moves(color, b=None, c=None):
-    """
-    Returns all valid moves for all pieces of a certain color
-    Returns 2d array of rows and files: [ [row,file], ... ]
-    Also returns true if the enemy king is in check, false if otherwise
-    """
-
-    b = b if b is not None else board.board
-    c = c if c is not None else board.color
-
-    valid_moves = []
-    enemy_in_check = False
-
-    for row in range(0, 8):
-        for file in range(0, 8):
-
-            if board.get_color(row, file, c) != color:
-                continue
-
-            piece_moves = get_valid_moves(row, file, False, b, c)
-            valid_moves.extend(piece_moves)
-
-            # Check if we are checking the king
-            for piece_move in piece_moves:
-                if board.get_color(piece_move[0], piece_move[1], c) != color and board.get_piece(piece_move[0], piece_move[1], b) == Type.KING:
-                    enemy_in_check = True
-
-    return valid_moves, enemy_in_check
+        return valid_moves, enemy_in_check

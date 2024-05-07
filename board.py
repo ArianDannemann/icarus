@@ -10,7 +10,6 @@ class Board():
     Handles piece positioning and moving on a board
     """
 
-
     board = [ 0 ] * 64
     color = [ 0 ] * 64
 
