@@ -151,8 +151,6 @@ def move_piece(row, file, new_row, new_file, b=board, c=color):
     for valid_move in piece.get_valid_moves(row, file):
         if position.equals(valid_move, [new_row, new_file]):
 
-            print(f"moved {row},{file} to {new_row},{new_file} on original board? {b==board}")
-
             teleport_piece(row, file, new_row, new_file, b, c)
 
             # Check if en passant was done
@@ -176,6 +174,7 @@ def move_piece(row, file, new_row, new_file, b=board, c=color):
                 set_piece(new_row, new_file, promotion_target, piece.Color(get_color(new_row, new_file, b)), b, c)
 
             result = 1
+            break
 
     en_passant_valid = (result == 1 and found_en_passant)
     if not en_passant_valid:

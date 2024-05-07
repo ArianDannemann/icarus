@@ -2,8 +2,6 @@
 The entry point for Icarus
 """
 
-# FIXME - taking pawn that just took via en-passant is a suicide mission
-
 import board
 import piece
 import ui
