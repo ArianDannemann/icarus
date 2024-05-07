@@ -116,7 +116,7 @@ def get_knight_moves(row, file, color=None, c=None):
     # Remove moves that are now withing the bounds of the board
     i = 0
     while i < len(valid_moves):
-        if is_in_bounds(valid_moves[i]) or board.get_color(valid_moves[i][0], valid_moves[i][1], c) == color:
+        if not position.is_in_bounds(valid_moves[i]) or board.get_color(valid_moves[i][0], valid_moves[i][1], c) == color:
             valid_moves.pop(i)
             i-=1
 
