@@ -67,7 +67,7 @@ def get_valid_moves(row, file, simulate=True, b=None, c=None):
         valid_moves.extend(get_line_move(row, file, -1, 0, color, c))
 
     if piece == Type.KING:
-        valid_moves.extend(get_king_moves(row, file, color, c))
+        valid_moves.extend(get_king_moves(row, file, color, b, c, simulate))
 
     if piece == Type.KNIGHT:
         valid_moves.extend(get_knight_moves(row, file, color, c))
@@ -116,7 +116,7 @@ def get_knight_moves(row, file, color=None, c=None):
     # Remove moves that are now withing the bounds of the board
     i = 0
     while i < len(valid_moves):
-        if valid_moves[i][0] > 7 or valid_moves[i][0] < 0 or valid_moves[i][1] > 7 or valid_moves[i][1] < 0 or board.get_color(valid_moves[i][0], valid_moves[i][1], c) == color:
+        if is_in_bounds(valid_moves[i]) or board.get_color(valid_moves[i][0], valid_moves[i][1], c) == color:
             valid_moves.pop(i)
             i-=1
 
@@ -124,13 +124,13 @@ def get_knight_moves(row, file, color=None, c=None):
 
     return valid_moves
 
-def get_king_moves(row, file, color=None, c=None):
+def get_king_moves(row, file, color=None, b=None, c=None, can_castle=True):
     """
     Returns all valid positions for a king at row and file
     Returns 2d array of rows and files: [ [row,file], ... ]
     """
-    # TODO - castle
 
+    b = b if b is not None else board.board
     c = c if c is not None else board.color
     color = board.get_color(row, file, c) if color is None else color
 
@@ -152,10 +152,20 @@ def get_king_moves(row, file, color=None, c=None):
                 valid_moves.append([current_row, current_file])
 
     castle_info = board.white_castle_info if color == Color.WHITE else board.black_castle_info
-    if not castle_info[0]:
-        if not castle_info[1]:
+    if not castle_info[0] and can_castle:
+        enemy_moves, in_check = get_all_moves(Color.WHITE if color == Color.BLACK else Color.BLACK, b, c)
+
+        if in_check:
+            return valid_moves
+
+        if (not castle_info[1]
+        and [row,file-1] not in enemy_moves
+        and [row,file-2] not in enemy_moves):
             valid_moves.append([row,file-2])
-        if not castle_info[2]:
+
+        if (not castle_info[2]
+        and [row,file+1] not in enemy_moves
+        and [row,file+2] not in enemy_moves):
             valid_moves.append([row,file+2])
 
     return valid_moves
