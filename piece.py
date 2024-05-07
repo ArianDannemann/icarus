@@ -151,6 +151,9 @@ def get_king_moves(row, file, color=None, b=None, c=None, can_castle=True):
             if board.get_color(current_row, current_file, c) != color:
                 valid_moves.append([current_row, current_file])
 
+    # NOTE - it does not matter here that we use board instead of b
+    #        since we dont castle in simulation (we cant take the king through castles)
+    # Check for castling
     castle_info = board.white_castle_info if color == Color.WHITE else board.black_castle_info
     if not castle_info[0] and can_castle:
         enemy_moves, in_check = get_all_moves(Color.WHITE if color == Color.BLACK else Color.BLACK, b, c)
@@ -160,12 +163,16 @@ def get_king_moves(row, file, color=None, b=None, c=None, can_castle=True):
 
         if (not castle_info[1]
         and [row,file-1] not in enemy_moves
-        and [row,file-2] not in enemy_moves):
+        and [row,file-2] not in enemy_moves
+        and board.get_piece(row, file-1, b) == Type.NONE
+        and board.get_piece(row, file-2, b) == Type.NONE):
             valid_moves.append([row,file-2])
 
         if (not castle_info[2]
         and [row,file+1] not in enemy_moves
-        and [row,file+2] not in enemy_moves):
+        and [row,file+2] not in enemy_moves
+        and board.get_piece(row, file+1, b) == Type.NONE
+        and board.get_piece(row, file+2, b) == Type.NONE):
             valid_moves.append([row,file+2])
 
     return valid_moves
