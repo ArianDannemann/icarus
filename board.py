@@ -3,6 +3,7 @@ Handles piece positioning and moving on a board
 """
 
 import piece
+import position
 
 board = [ 0 ] * 64
 color = [ 0 ] * 64
@@ -148,11 +149,16 @@ def move_piece(row, file, new_row, new_file, b=board, c=color):
     found_en_passant = False
 
     for valid_move in piece.get_valid_moves(row, file):
-        if valid_move[0] == new_row and valid_move[1] == new_file:
+        if position.equals(valid_move, [new_row, new_file]):
+
+            print(f"moved {row},{file} to {new_row},{new_file} on original board? {b==board}")
+
             teleport_piece(row, file, new_row, new_file, b, c)
 
             # Check if en passant was done
-            if get_piece(new_row, new_file, b) == piece.Type.PAWN and new_row == en_passant_target[0] and new_file == en_passant_target[1] and en_passant_valid:
+            if (get_piece(new_row, new_file, b) == piece.Type.PAWN
+            and position.equals(en_passant_target, [new_row, new_file])
+            and en_passant_valid):
                 set_piece(en_passant_victim[0], en_passant_victim[1], piece.Type.NONE, piece.Color.NONE, b, c)
 
             # Check if en passant can be done in the next move
@@ -171,8 +177,10 @@ def move_piece(row, file, new_row, new_file, b=board, c=color):
 
             result = 1
 
-
     en_passant_valid = (result == 1 and found_en_passant)
+    if not en_passant_valid:
+        en_passant_target = [-1,-1]
+
     return result
 
 def copy(b=board, c=color):

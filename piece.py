@@ -195,8 +195,8 @@ def get_pawn_moves(row, file, color=None, c=None):
     # Remove moves that are now withing the bounds of the board
     i = 0
     while i < len(valid_moves):
-        same_color = board.get_color(valid_moves[i][0], valid_moves[i][1]) == color
-        if not position.is_in_bounds(valid_moves[i]) or same_color:
+        if (not position.is_in_bounds(valid_moves[i])
+        or board.get_color(valid_moves[i][0], valid_moves[i][1]) == color):
             valid_moves.pop(i)
             i-=1
         i+=1
