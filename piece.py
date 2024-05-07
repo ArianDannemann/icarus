@@ -130,7 +130,6 @@ def get_king_moves(row, file, color=None, c=None):
     Returns 2d array of rows and files: [ [row,file], ... ]
     """
     # TODO - castle
-    # TODO - checks
 
     c = c if c is not None else board.color
     color = board.get_color(row, file, c) if color is None else color
@@ -146,10 +145,18 @@ def get_king_moves(row, file, color=None, c=None):
             current_row = row + off_x
             current_file = file + off_y
 
-            if current_row > 7 or current_row < 0 or current_file > 7 or current_file < 0:
+            if not position.is_in_bounds([current_row, current_file]):
                 continue
 
-            valid_moves.append([current_row, current_file]) if board.get_color(current_row, current_file, c) != color else None
+            if board.get_color(current_row, current_file, c) != color:
+                valid_moves.append([current_row, current_file])
+
+    castle_info = board.white_castle_info if color == Color.WHITE else board.black_castle_info
+    if not castle_info[0]:
+        if not castle_info[1]:
+            valid_moves.append([row,file-2])
+        if not castle_info[2]:
+            valid_moves.append([row,file+2])
 
     return valid_moves
 
@@ -158,7 +165,6 @@ def get_pawn_moves(row, file, color=None, c=None):
     Returns all valid positions for a pawn at row and file
     Returns 2d array of rows and files: [ [row,file], ... ]
     """
-    # TODO - simplify
 
     c = c if c is not None else board.color
     color = color if color is not None else board.get_color(row, file, c)

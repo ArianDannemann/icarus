@@ -12,6 +12,12 @@ en_passant_target = [ -1, -1 ]
 en_passant_victim = [ -1, -1 ]
 en_passant_valid = False
 
+# 0: king moved, 1 if yes
+# 1: a rook moved, 1 if yes
+# 2: h rook moved, 1 if yes
+white_castle_info = [ 0, 0, 0 ] # test
+black_castle_info = [ 0, 0, 0 ]
+
 promotion_target = piece.Type.NONE
 
 def setup():
@@ -148,19 +154,22 @@ def move_piece(row, file, new_row, new_file, b=board, c=color):
     result = 0
     found_en_passant = False
 
+    current_piece = get_piece(row, file, b)
+    current_color = get_color(row, file, c)
+
     for valid_move in piece.get_valid_moves(row, file):
         if position.equals(valid_move, [new_row, new_file]):
 
             teleport_piece(row, file, new_row, new_file, b, c)
 
             # Check if en passant was done
-            if (get_piece(new_row, new_file, b) == piece.Type.PAWN
+            if (current_piece == piece.Type.PAWN
             and position.equals(en_passant_target, [new_row, new_file])
             and en_passant_valid):
                 set_piece(en_passant_victim[0], en_passant_victim[1], piece.Type.NONE, piece.Color.NONE, b, c)
 
             # Check if en passant can be done in the next move
-            if get_piece(new_row, new_file, b) == piece.Type.PAWN and abs(row-new_row) > 1:
+            if current_piece == piece.Type.PAWN and abs(row-new_row) > 1:
                 en_passant_target = (
                     [new_row-1, new_file]
                     if get_color(new_row, new_file, c) == piece.Color.WHITE else
@@ -170,8 +179,24 @@ def move_piece(row, file, new_row, new_file, b=board, c=color):
                 found_en_passant = True
 
             # Check for promotion
-            if get_piece(new_row, new_file, b) == piece.Type.PAWN and (new_row == 7 or new_row == 0):
-                set_piece(new_row, new_file, promotion_target, piece.Color(get_color(new_row, new_file, b)), b, c)
+            if (current_piece == piece.Type.PAWN and new_row in[0,7]):
+                set_piece(new_row, new_file, promotion_target, get_color(new_row, new_file, b), b, c)
+
+            # Castle
+            if current_piece == piece.Type.KING and abs(file-new_file) > 1:
+                if new_file > file:
+                    teleport_piece(row, 7, row, 5, b, c)
+                else:
+                    teleport_piece(row, 0, row, 3, b, c)
+
+            # Update castling information
+            castle_info = white_castle_info if current_color == piece.Color.WHITE else black_castle_info
+            if current_piece == piece.Type.KING:
+                castle_info[0] = 1
+            elif current_piece == piece.Type.ROOK and file == 0:
+                castle_info[1] = 1
+            elif current_piece == piece.Type.ROOK and file == 7:
+                castle_info[2] = 1
 
             result = 1
             break
