@@ -2,10 +2,11 @@
 The entry point for Icarus
 """
 
-import board
+from board import Board
 import piece
 import ui
 
+board = Board()
 board.promotion_target = piece.Type.QUEEN
 board.setup()
 
