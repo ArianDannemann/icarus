@@ -25,10 +25,10 @@ class UI():
     square_width = 80
     square_height = 80
 
-    selected_piece = [-1,-1]
-    selected_moves = []
+    selected_piece: list[int] = [-1,-1]
+    selected_moves: list[list[int]] = []
 
-    piece_images = []
+    piece_images: list[ImageTk.PhotoImage] = []
 
     def init(self, board):
         """

@@ -7,10 +7,10 @@ import board
 import piece
 import ui
 
-board = board.Board()
-board.promotion_target = piece.Type.QUEEN
-board.setup()
+my_board: board.Board = board.Board()
+my_board.promotion_target = piece.Type.QUEEN
+my_board.setup()
 
-ui = ui.UI()
-ui.init(board)
-ui.keep_alive()
+my_ui: ui.UI = ui.UI()
+my_ui.init(my_board)
+my_ui.keep_alive()
