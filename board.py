@@ -20,7 +20,7 @@ class Board():
     # 0: king moved, 1 if yes
     # 1: a rook moved, 1 if yes
     # 2: h rook moved, 1 if yes
-    white_castle_info = [ 0, 0, 0 ] # test
+    white_castle_info = [ 0, 0, 0 ]
     black_castle_info = [ 0, 0, 0 ]
 
     promotion_target = piece.Type.NONE
@@ -162,7 +162,7 @@ class Board():
         current_piece = self.get_piece(row, file)
         current_color = self.get_color(row, file)
 
-        for valid_move in piece.get_valid_moves(row, file):
+        for valid_move in piece.get_valid_moves(row, file, True, self):
             if position.equals(valid_move, [new_row, new_file]):
 
                 self.teleport_piece(row, file, new_row, new_file)
@@ -200,8 +200,8 @@ class Board():
                 result = 1
                 break
 
-        en_passant_valid = (result == 1 and found_en_passant)
-        if not en_passant_valid:
+        self.en_passant_valid = (result == 1 and found_en_passant)
+        if not self.en_passant_valid:
             self.en_passant_target = [-1,-1]
 
         return result
@@ -217,6 +217,7 @@ class Board():
         if (current_piece == piece.Type.PAWN
         and position.equals(self.en_passant_target, [new_row, new_file])
         and self.en_passant_valid):
+            print("en passant")
             self.set_piece(
                     self.en_passant_victim[0],
                     self.en_passant_victim[1],

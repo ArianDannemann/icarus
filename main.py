@@ -2,13 +2,14 @@
 The entry point for Icarus
 """
 
-from board import Board
+import board
 import piece
 import ui
 
-board = Board()
+board = board.Board()
 board.promotion_target = piece.Type.QUEEN
 board.setup()
 
-ui.init()
+ui = ui.UI()
+ui.init(board)
 ui.keep_alive()
