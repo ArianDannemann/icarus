@@ -1,3 +1,4 @@
+
 """
 Holds the UI class
 """
@@ -130,6 +131,11 @@ class UI():
         """
         Handles mous click event
         """
+
+        # NOTE - required since pylint does not like unused vars
+        # (it is unused because we use absolute x and why, however
+        # the event still needs to pass it)
+        _ = event_origin
 
         row, file = self.get_square()
 

@@ -1,6 +1,7 @@
 """
 The entry point for Icarus
 """
+# pylint: disable=unused-argument
 
 import board
 import piece
