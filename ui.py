@@ -1,3 +1,4 @@
+
 """
 Holds the UI class
 """
@@ -24,10 +25,10 @@ class UI():
     square_width = 80
     square_height = 80
 
-    selected_piece = [-1,-1]
-    selected_moves = []
+    selected_piece: list[int] = [-1,-1]
+    selected_moves: list[list[int]] = []
 
-    piece_images = []
+    piece_images: list[ImageTk.PhotoImage] = []
 
     def init(self, board):
         """
@@ -130,6 +131,11 @@ class UI():
         """
         Handles mous click event
         """
+
+        # NOTE - required since pylint does not like unused vars
+        # (it is unused because we use absolute x and why, however
+        # the event still needs to pass it)
+        _ = event_origin
 
         row, file = self.get_square()
 
