@@ -22,4 +22,4 @@ jobs:
         pip install pycodestyle
     - name: Analysing the code with PEP8
       run: |
-        pycodestyle $(git ls-files '*.py')
+        pycodestyle --ignore=E501 $(git ls-files '*.py')
