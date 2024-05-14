@@ -2,12 +2,14 @@
 Module to help with some operations on positions
 """
 
+
 def equals(a, b):
     """
     Returns true if a[0]==b[0] and a[1]==b[1]
     """
 
-    return (a[0]==b[0] and a[1]==b[1])
+    return (a[0] == b[0] and a[1] == b[1])
+
 
 def is_in_bounds(a):
     """

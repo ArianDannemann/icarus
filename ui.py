@@ -8,6 +8,7 @@ from PIL import Image, ImageTk
 
 import piece
 
+
 class UI():
     """
     Icarus user interface
@@ -25,7 +26,7 @@ class UI():
     square_width = 80
     square_height = 80
 
-    selected_piece: list[int] = [-1,-1]
+    selected_piece: list[int] = [-1, -1]
     selected_moves: list[list[int]] = []
 
     piece_images: list[ImageTk.PhotoImage] = []
@@ -148,7 +149,7 @@ class UI():
                     row,
                     file
             )
-            self.selected_piece = [-1,-1]
+            self.selected_piece = [-1, -1]
             self.selected_moves = []
 
             self.update()

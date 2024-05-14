@@ -5,23 +5,24 @@ Hold the class Board
 import piece
 import position
 
+
 class Board():
     """
     Handles piece positioning and moving on a board
     """
 
-    board = [ 0 ] * 64
-    color = [ 0 ] * 64
+    board = [0] * 64
+    color = [0] * 64
 
-    en_passant_target = [ -1, -1 ]
-    en_passant_victim = [ -1, -1 ]
+    en_passant_target = [-1, -1]
+    en_passant_victim = [-1, -1]
     en_passant_valid = False
 
     # 0: king moved, 1 if yes
     # 1: a rook moved, 1 if yes
     # 2: h rook moved, 1 if yes
-    white_castle_info = [ 0, 0, 0 ]
-    black_castle_info = [ 0, 0, 0 ]
+    white_castle_info = [0, 0, 0]
+    black_castle_info = [0, 0, 0]
 
     promotion_target = piece.Type.NONE
 
@@ -170,7 +171,7 @@ class Board():
                 found_en_passant = self.handle_en_passant(row, new_row, new_file, current_piece)
 
                 # Check for promotion
-                if (current_piece == piece.Type.PAWN and new_row in[0,7]):
+                if (current_piece == piece.Type.PAWN and new_row in [0, 7]):
                     self.set_piece(
                             new_row,
                             new_file,
@@ -202,7 +203,7 @@ class Board():
 
         self.en_passant_valid = (result == 1 and found_en_passant)
         if not self.en_passant_valid:
-            self.en_passant_target = [-1,-1]
+            self.en_passant_target = [-1, -1]
 
         return result
 
@@ -215,8 +216,8 @@ class Board():
 
         # Check if en passant was done
         if (current_piece == piece.Type.PAWN
-        and position.equals(self.en_passant_target, [new_row, new_file])
-        and self.en_passant_valid):
+                and position.equals(self.en_passant_target, [new_row, new_file])
+                and self.en_passant_valid):
             print("en passant")
             self.set_piece(
                     self.en_passant_victim[0],
