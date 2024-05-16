@@ -103,7 +103,7 @@ class Board():
         if row > 7 or row < 0 or file > 7 or file < 0:
             return piece.Type.NONE
 
-        return piece.Type(self.board[(row*8) + file])
+        return piece.Type(self.board[(row * 8) + file])
 
     def set_piece(self, row, file, piece_type=piece.Type.PAWN, piece_color=piece.Color.WHITE):
         """
@@ -113,7 +113,7 @@ class Board():
         if row > 7 or row < 0 or file > 7 or file < 0:
             return
 
-        self.board[(row*8) + file] = piece_type.value
+        self.board[(row * 8) + file] = piece_type.value
         self.set_color(row, file, piece_color)
 
     def get_color(self, row, file):
@@ -124,7 +124,7 @@ class Board():
         if not position.is_in_bounds([row, file]):
             return piece.Color.NONE
 
-        return piece.Color(self.color[(row*8) + file])
+        return piece.Color(self.color[(row * 8) + file])
 
     def set_color(self, row, file, new_color):
         """
@@ -134,7 +134,7 @@ class Board():
         if not position.is_in_bounds([row, file]):
             return
 
-        self.color[(row*8) + file] = new_color.value
+        self.color[(row * 8) + file] = new_color.value
 
     def teleport_piece(self, row, file, new_row, new_file):
         """
@@ -143,10 +143,10 @@ class Board():
         """
 
         self.set_piece(
-                new_row,
-                new_file,
-                piece.Type(self.get_piece(row, file)),
-                piece.Color(self.get_color(row, file))
+            new_row,
+            new_file,
+            piece.Type(self.get_piece(row, file)),
+            piece.Color(self.get_color(row, file))
         )
         self.set_piece(row, file, piece.Type.NONE, piece.Color.NONE)
 
@@ -173,14 +173,14 @@ class Board():
                 # Check for promotion
                 if (current_piece == piece.Type.PAWN and new_row in [0, 7]):
                     self.set_piece(
-                            new_row,
-                            new_file,
-                            self.promotion_target,
-                            self.get_color(new_row, new_file)
+                        new_row,
+                        new_file,
+                        self.promotion_target,
+                        self.get_color(new_row, new_file)
                     )
 
                 # Castle
-                if current_piece == piece.Type.KING and abs(file-new_file) > 1:
+                if current_piece == piece.Type.KING and abs(file - new_file) > 1:
                     if new_file > file:
                         self.teleport_piece(row, 7, row, 5)
                     else:
@@ -215,23 +215,25 @@ class Board():
         """
 
         # Check if en passant was done
-        if (current_piece == piece.Type.PAWN
-                and position.equals(self.en_passant_target, [new_row, new_file])
-                and self.en_passant_valid):
+        if (
+            current_piece == piece.Type.PAWN
+            and position.equals(self.en_passant_target, [new_row, new_file])
+            and self.en_passant_valid
+        ):
             print("en passant")
             self.set_piece(
-                    self.en_passant_victim[0],
-                    self.en_passant_victim[1],
-                    piece.Type.NONE,
-                    piece.Color.NONE
+                self.en_passant_victim[0],
+                self.en_passant_victim[1],
+                piece.Type.NONE,
+                piece.Color.NONE
             )
 
         # Check if en passant can be done in the next move
-        if current_piece == piece.Type.PAWN and abs(row-new_row) > 1:
+        if current_piece == piece.Type.PAWN and abs(row - new_row) > 1:
             self.en_passant_target = (
-                [new_row-1, new_file]
+                [new_row - 1, new_file]
                 if self.get_color(new_row, new_file) == piece.Color.WHITE else
-                [new_row+1, new_file]
+                [new_row + 1, new_file]
             )
             self.en_passant_victim = ([new_row, new_file])
             return True

@@ -39,7 +39,7 @@ class UI():
         self.root = tk.Tk()
         self.root.title(self.title)
 
-        self.canvas = tk.Canvas(width=self.square_width*8, height=self.square_height*8)
+        self.canvas = tk.Canvas(width=self.square_width * 8, height=self.square_height * 8)
         self.canvas.pack()
 
         self.board = board
@@ -62,7 +62,7 @@ class UI():
 
                 # Check if square is movable
                 for selected_move in self.selected_moves:
-                    if selected_move[0] == 7-row and selected_move[1] == file:
+                    if selected_move[0] == 7 - row and selected_move[1] == file:
 
                         color = self.select_color
 
@@ -70,20 +70,20 @@ class UI():
                 y = row * self.square_height
 
                 self.canvas.create_rectangle(
-                        (x, y),
-                        (x+self.square_height, y+self.square_width),
-                        fill=color
+                    (x, y),
+                    (x + self.square_height, y + self.square_width),
+                    fill=color
                 )
 
-                if self.board.get_color(7-row, file) != piece.Color.NONE:
+                if self.board.get_color(7 - row, file) != piece.Color.NONE:
                     self.canvas.create_image(
-                            x,
-                            y,
-                            anchor=tk.NW,
-                            image=self.get_piece_image(
-                                self.board.get_piece(7-row, file),
-                                self.board.get_color(7-row, file)
-                            )
+                        x,
+                        y,
+                        anchor=tk.NW,
+                        image=self.get_piece_image(
+                            self.board.get_piece(7 - row, file),
+                            self.board.get_color(7 - row, file)
+                        )
                     )
 
     def get_piece_image(self, current_piece, current_color):
@@ -92,10 +92,10 @@ class UI():
         """
 
         if current_color == piece.Color.WHITE:
-            return self.piece_images[current_piece.value-1]
+            return self.piece_images[current_piece.value - 1]
 
         if current_color == piece.Color.BLACK:
-            return self.piece_images[(current_piece.value-1)+6]
+            return self.piece_images[(current_piece.value - 1) + 6]
 
         return None
 
@@ -123,10 +123,10 @@ class UI():
         """
 
         return ImageTk.PhotoImage(
-                    Image.open(f"./resources/pieces/{name}.png").resize(
-                        (self.square_width, self.square_height)
-                    ).convert("RGBA")
-                )
+            Image.open(f"./resources/pieces/{name}.png").resize(
+                (self.square_width, self.square_height)
+            ).convert("RGBA")
+        )
 
     def click_square(self, event_origin):
         """
@@ -144,10 +144,10 @@ class UI():
 
         if self.selected_piece[0] != -1:
             result = self.board.move_piece(
-                    self.selected_piece[0],
-                    self.selected_piece[1],
-                    row,
-                    file
+                self.selected_piece[0],
+                self.selected_piece[1],
+                row,
+                file
             )
             self.selected_piece = [-1, -1]
             self.selected_moves = []
@@ -171,7 +171,7 @@ class UI():
         x = self.root.winfo_pointerx() - self.root.winfo_rootx()
         y = self.root.winfo_pointery() - self.root.winfo_rooty()
 
-        row = 7-int(y / self.square_height)
+        row = 7 - int(y / self.square_height)
         file = int(x / self.square_width)
 
         return row, file
