@@ -65,6 +65,46 @@ class Board():
         self.set_piece(6, 6, piece.Type.PAWN, piece.Color.BLACK)
         self.set_piece(6, 7, piece.Type.PAWN, piece.Color.BLACK)
 
+    def board_to_fen(self):
+        """
+        Returns the FEN notation for the currrent board position
+        """
+
+        result = ""
+        empty = 0
+
+        for row in range(7, -1, -1):
+            for file in range(0, 8):
+                piece_type = self.get_piece(row, file)
+                piece_color = self.get_color(row, file)
+
+                if piece_type != piece.Type.NONE and empty != 0:
+                    result += str(empty)
+                    empty = 0
+                elif piece_type == piece.Type.NONE:
+                    empty += 1
+
+                if piece_type == piece.Type.PAWN:
+                    result += "P" if piece_color == piece.Color.WHITE else "p"
+                if piece_type == piece.Type.KING:
+                    result += "K" if piece_color == piece.Color.WHITE else "k"
+                if piece_type == piece.Type.QUEEN:
+                    result += "Q" if piece_color == piece.Color.WHITE else "q"
+                if piece_type == piece.Type.ROOK:
+                    result += "R" if piece_color == piece.Color.WHITE else "r"
+                if piece_type == piece.Type.KNIGHT:
+                    result += "N" if piece_color == piece.Color.WHITE else "n"
+                if piece_type == piece.Type.BISHOP:
+                    result += "B" if piece_color == piece.Color.WHITE else "b"
+
+            if row != 0 and empty != 0:
+                result += f"{empty}/"
+                empty = 0
+            elif row != 0:
+                result += "/"
+
+        return result
+
     def display(self):
         """
         Print the current board layout to console
