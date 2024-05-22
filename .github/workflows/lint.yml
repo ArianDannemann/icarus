@@ -22,4 +22,4 @@ jobs:
         pip install mypy
     - name: Analysing the code with mypy
       run: |
-        mypy .
+        mypy --strict --disallow-untyped-defs --disallow-incomplete-defs --disallow-any-explicit --disallow-any-generics *.py
