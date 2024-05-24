@@ -30,7 +30,7 @@ class Type(Enum):
     KNIGHT = 6
 
 
-def get_valid_moves(row, file, simulate, board):
+def get_valid_moves(row: int, file: int, simulate: bool, board: list[int]) -> list[list[int]]:
     """
     Returns all valid positions for piece at row and file
     Returns 2d array of rows and files: [ [row,file], ... ]

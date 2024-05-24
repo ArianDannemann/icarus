@@ -3,7 +3,7 @@ Module to help with some operations on positions
 """
 
 
-def equals(a, b):
+def equals(a: list[int], b: list[int]) -> bool:
     """
     Returns true if a[0]==b[0] and a[1]==b[1]
     """
@@ -11,7 +11,7 @@ def equals(a, b):
     return (a[0] == b[0] and a[1] == b[1])
 
 
-def is_in_bounds(a):
+def is_in_bounds(a: list[int]) -> bool:
     """
     Returns true if a[0] and a[1] are within the bounds of 0 to 7
     """

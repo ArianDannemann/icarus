@@ -7,6 +7,7 @@ import tkinter as tk
 from PIL import Image, ImageTk
 
 import piece
+from exceptions import InconsistentState
 
 
 class UI():
@@ -37,6 +38,8 @@ class UI():
         Initializes a tkinter window
         """
 
+        # TODO - clean up ui code
+
         self.root = tk.Tk()
         self.root["bg"] = "#262626"
         self.root.title(self.title)
@@ -58,7 +61,7 @@ class UI():
             bg="#4e4e4e",
             fg="#ebdbb2",
             borderwidth=0,
-            width=50,
+            width=20,
             highlightthickness=0,
             activebackground="#ebdbb2",
             activeforeground="#4e4e4e",
@@ -77,7 +80,7 @@ class UI():
         board_setup_frame = tk.Frame(self.root)
         self.fen_text = tk.StringVar(value="hi")
         fen_entry_box = tk.Entry(board_setup_frame, textvar=self.fen_text)
-        load_fen_button = tk.Button(board_setup_frame, text="Load FEN")
+        load_fen_button = tk.Button(board_setup_frame, text="Load FEN", command=self.handle_load_fen_button)
         load_fen_button.config(
             bg="#4e4e4e",
             fg="#ebdbb2",
@@ -127,21 +130,28 @@ class UI():
                 x = file * self.square_width
                 y = row * self.square_height
 
+                # Create the background square
                 self.canvas.create_rectangle(
                     (x, y),
                     (x + self.square_height, y + self.square_width),
                     fill=color
                 )
 
+                # Draw the piece
                 if self.board.get_color(7 - row, file) != piece.Color.NONE:
+                    current_piece = self.board.get_piece(7 - row, file)
+                    current_color = self.board.get_color(7 - row, file)
+
+                    if current_piece.value == 0 and current_color.value != 0:
+                        raise InconsistentState("Piece is NONE but color is set")
+                    if current_piece.value != 0 and current_color.value == 0:
+                        raise InconsistentState("Color is NONE but piece is set")
+
                     self.canvas.create_image(
                         x,
                         y,
                         anchor=tk.NW,
-                        image=self.get_piece_image(
-                            self.board.get_piece(7 - row, file),
-                            self.board.get_color(7 - row, file)
-                        )
+                        image=self.get_piece_image(current_piece, current_color)
                     )
 
     def get_piece_image(self, current_piece, current_color):
@@ -240,3 +250,11 @@ class UI():
         """
 
         self.root.mainloop()
+
+    def handle_load_fen_button(self):
+        """
+        Called when the "Load FEN" button is pressed
+        """
+
+        self.board.load_fen(self.fen_text.get())
+        self.update()

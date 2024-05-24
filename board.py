@@ -105,6 +105,57 @@ class Board():
 
         return result
 
+    def load_fen(self, fen: str) -> None:
+        """
+        Loads a given FEN notation into the board position
+        """
+
+        row = 7
+        file = 0
+
+        # TODO - create functions that convert pieces to chars
+        # TODO - check for invalid input
+
+        # Clear the board
+        self.board = [0] * 64
+        self.color = [0] * 64
+
+        for char in fen:
+            if char == "/":
+                continue
+            if char == "r":
+                self.set_piece(row, file, piece.Type.ROOK, piece.Color.BLACK)
+            if char == "q":
+                self.set_piece(row, file, piece.Type.QUEEN, piece.Color.BLACK)
+            if char == "k":
+                self.set_piece(row, file, piece.Type.KING, piece.Color.BLACK)
+            if char == "b":
+                self.set_piece(row, file, piece.Type.BISHOP, piece.Color.BLACK)
+            if char == "n":
+                self.set_piece(row, file, piece.Type.KNIGHT, piece.Color.BLACK)
+            if char == "p":
+                self.set_piece(row, file, piece.Type.PAWN, piece.Color.BLACK)
+            if char == "R":
+                self.set_piece(row, file, piece.Type.ROOK, piece.Color.WHITE)
+            if char == "Q":
+                self.set_piece(row, file, piece.Type.QUEEN, piece.Color.WHITE)
+            if char == "K":
+                self.set_piece(row, file, piece.Type.KING, piece.Color.WHITE)
+            if char == "B":
+                self.set_piece(row, file, piece.Type.BISHOP, piece.Color.WHITE)
+            if char == "N":
+                self.set_piece(row, file, piece.Type.KNIGHT, piece.Color.WHITE)
+            if char == "P":
+                self.set_piece(row, file, piece.Type.PAWN, piece.Color.WHITE)
+
+            if self.get_piece(row, file) == piece.Type.NONE:
+                file += int(char) - 1
+
+            file += 1
+            if file > 7:
+                file = 0
+                row -= 1
+
     def display(self):
         """
         Print the current board layout to console
