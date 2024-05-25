@@ -3,15 +3,19 @@ Holds the classes Color and Type
 """
 
 from enum import Enum
+import typing
 
 import board as b
 import position
+
+# TODO - replace typing.Any notations with proper typing
 
 
 class Color(Enum):
     """
     Types of chess pieces
     """
+
     NONE = 0
     WHITE = 1
     BLACK = 2
@@ -21,6 +25,7 @@ class Type(Enum):
     """
     Types of chess pieces
     """
+
     NONE = 0
     PAWN = 1
     KING = 2
@@ -30,10 +35,12 @@ class Type(Enum):
     KNIGHT = 6
 
 
-def get_valid_moves(row, file, simulate, board):
+def get_valid_moves(row: int, file: int, simulate: bool, board: typing.Any) -> list[list[int]]:
     """
     Returns all valid positions for piece at row and file
     Returns 2d array of rows and files: [ [row,file], ... ]
+
+    board has to be of type board.Board
     """
 
     piece = board.get_piece(row, file)
@@ -100,10 +107,12 @@ def get_valid_moves(row, file, simulate, board):
     return valid_moves
 
 
-def get_knight_moves(row, file, board):
+def get_knight_moves(row: int, file: int, board: typing.Any) -> list[list[int]]:
     """
     Returns all valid positions for a knight at row and file
     Returns 2d array of rows and files: [ [row,file], ... ]
+
+    board has to be of type board.Board
     """
 
     color = board.get_color(row, file)
@@ -132,10 +141,15 @@ def get_knight_moves(row, file, board):
     return valid_moves
 
 
-def get_king_moves(row, file, board, can_castle=True):
+def get_king_moves(row: int,
+                   file: int,
+                   board: typing.Any,
+                   can_castle: bool = True) -> list[list[int]]:
     """
     Returns all valid positions for a king at row and file
     Returns 2d array of rows and files: [ [row,file], ... ]
+
+    board has to be of type board.Board
     """
 
     valid_moves = []
@@ -184,10 +198,12 @@ def get_king_moves(row, file, board, can_castle=True):
     return valid_moves
 
 
-def get_pawn_moves(row, file, board):
+def get_pawn_moves(row: int, file: int, board: typing.Any) -> list[list[int]]:
     """
     Returns all valid positions for a pawn at row and file
     Returns 2d array of rows and files: [ [row,file], ... ]
+
+    board has to be of type board.Board
     """
 
     valid_moves = []
@@ -232,12 +248,14 @@ def get_pawn_moves(row, file, board):
     return valid_moves
 
 
-def get_line_move(row, file, direction, board):
+def get_line_move(row: int, file: int, direction: list[int], board: typing.Any) -> list[list[int]]:
     """
     Returns all valid positions for piece at row and file in
     the direction of dir_row and dir_file
     For everystep in the line search we change row+=dir_row and file+=dir_file
     Returns 2d array of rows and files: [ [row,file], ... ]
+
+    board has to be of type board.Board
     """
 
     color = board.get_color(row, file)
@@ -262,13 +280,14 @@ def get_line_move(row, file, direction, board):
     return valid_moves
 
 
-# NOTE - active_board and active_color should be board.board and board.color
-#        the None attribute was set to prevent circular imports
-def get_all_moves(color, board):
+def get_all_moves(color: typing.Any, board: typing.Any) -> tuple[list[list[int]], bool]:
     """
     Returns all valid moves for all pieces of a certain color
     Returns 2d array of rows and files: [ [row,file], ... ]
     Also returns true if the enemy king is in check, false if otherwise
+
+    color has to be of type piece.Color
+    board has to be of type board.Board
     """
 
     valid_moves = []
@@ -290,3 +309,59 @@ def get_all_moves(color, board):
                     enemy_in_check = True
 
     return valid_moves, enemy_in_check
+
+
+def piece_to_char(piece_type: Type, piece_color: Color) -> str:
+    """
+    Converts a piece to its corresponding character abreviation
+    """
+
+    result = "?"
+
+    if piece_type == Type.PAWN:
+        result = "P" if piece_color == Color.WHITE else "p"
+    if piece_type == Type.KING:
+        result = "K" if piece_color == Color.WHITE else "k"
+    if piece_type == Type.QUEEN:
+        result = "Q" if piece_color == Color.WHITE else "q"
+    if piece_type == Type.ROOK:
+        result = "R" if piece_color == Color.WHITE else "r"
+    if piece_type == Type.KNIGHT:
+        result = "N" if piece_color == Color.WHITE else "n"
+    if piece_type == Type.BISHOP:
+        result = "B" if piece_color == Color.WHITE else "b"
+
+    return result
+
+
+def char_to_piece(char: str) -> tuple[Type, Color]:
+    """
+    Converts a character to its corresponding piece type and color
+    """
+
+    piece_type = Type.NONE
+    piece_color = Color.BLACK
+
+    char = list(char)[0]
+
+    if char.isupper():
+        piece_color = Color.WHITE
+        char = char.lower()
+
+    if char == "p":
+        piece_type = Type.PAWN
+    if char == "q":
+        piece_type = Type.QUEEN
+    if char == "k":
+        piece_type = Type.KING
+    if char == "r":
+        piece_type = Type.ROOK
+    if char == "n":
+        piece_type = Type.KNIGHT
+    if char == "b":
+        piece_type = Type.BISHOP
+
+    if piece_type == Type.NONE:
+        piece_color = Color.NONE
+
+    return piece_type, piece_color

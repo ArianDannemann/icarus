@@ -26,7 +26,7 @@ class Board():
 
     promotion_target = piece.Type.NONE
 
-    def setup(self):
+    def setup(self) -> None:
         """
         Sets up the default chess position
         """
@@ -65,7 +65,72 @@ class Board():
         self.set_piece(6, 6, piece.Type.PAWN, piece.Color.BLACK)
         self.set_piece(6, 7, piece.Type.PAWN, piece.Color.BLACK)
 
-    def display(self):
+    def board_to_fen(self) -> str:
+        """
+        Returns the FEN notation for the currrent board position
+        """
+
+        result = ""
+        empty = 0
+
+        for row in range(7, -1, -1):
+            for file in range(0, 8):
+                piece_type = self.get_piece(row, file)
+                piece_color = self.get_color(row, file)
+
+                if piece_type != piece.Type.NONE and empty != 0:
+                    result += str(empty)
+                    empty = 0
+                elif piece_type == piece.Type.NONE:
+                    empty += 1
+
+                piece_char = piece.piece_to_char(piece_type, piece_color)
+
+                if piece_char != "?":
+                    result += piece_char
+
+            if row != 0 and empty != 0:
+                result += f"{empty}/"
+                empty = 0
+            elif row != 0:
+                result += "/"
+
+        return result
+
+    def load_fen(self, fen: str) -> None:
+        """
+        Loads a given FEN notation into the board position
+        """
+
+        row = 7
+        file = 0
+
+        # TODO - create functions that convert pieces to chars
+        # TODO - check for invalid input
+
+        # Clear the board
+        self.board = [0] * 64
+        self.color = [0] * 64
+
+        for char in fen:
+            if char == "/":
+                continue
+
+            piece_type, piece_color = piece.char_to_piece(char)
+            self.set_piece(row, file, piece_type, piece_color)
+
+            if self.get_piece(row, file) == piece.Type.NONE:
+                try:
+                    file += int(char) - 1
+                except ValueError:
+                    pass
+
+            file += 1
+            if file > 7:
+                file = 0
+                row -= 1
+
+    def display(self) -> None:
         """
         Print the current board layout to console
         """
@@ -77,25 +142,18 @@ class Board():
                 piece_type = self.get_piece(row, file)
                 piece_color = self.get_color(row, file)
 
-                if piece_type == piece.Type.PAWN:
-                    print("P" if piece_color == piece.Color.WHITE else "p", end=" ")
-                if piece_type == piece.Type.KING:
-                    print("K" if piece_color == piece.Color.WHITE else "k", end=" ")
-                if piece_type == piece.Type.QUEEN:
-                    print("Q" if piece_color == piece.Color.WHITE else "q", end=" ")
-                if piece_type == piece.Type.ROOK:
-                    print("R" if piece_color == piece.Color.WHITE else "r", end=" ")
-                if piece_type == piece.Type.KNIGHT:
-                    print("N" if piece_color == piece.Color.WHITE else "n", end=" ")
-                if piece_type == piece.Type.BISHOP:
-                    print("B" if piece_color == piece.Color.WHITE else "b", end=" ")
+                piece_char = piece.piece_to_char(piece_type, piece_color)
+
+                if piece_char != "?":
+                    print(piece_char, end=" ")
+
                 if piece_type == piece.Type.NONE:
                     print("  ", end="")
 
             print("")
         print("\n     0 1 2 3 4 5 6 7")
 
-    def get_piece(self, row, file):
+    def get_piece(self, row: int, file: int) -> piece.Type:
         """
         Returns the piece at row and file
         """
@@ -105,7 +163,11 @@ class Board():
 
         return piece.Type(self.board[(row * 8) + file])
 
-    def set_piece(self, row, file, piece_type=piece.Type.PAWN, piece_color=piece.Color.WHITE):
+    def set_piece(self,
+                  row: int,
+                  file: int,
+                  piece_type: piece.Type = piece.Type.PAWN,
+                  piece_color: piece.Color = piece.Color.WHITE) -> None:
         """
         Sets piece at row and file to type
         """
@@ -116,7 +178,7 @@ class Board():
         self.board[(row * 8) + file] = piece_type.value
         self.set_color(row, file, piece_color)
 
-    def get_color(self, row, file):
+    def get_color(self, row: int, file: int) -> piece.Color:
         """
         Gets color of piece at row and file
         """
@@ -126,7 +188,7 @@ class Board():
 
         return piece.Color(self.color[(row * 8) + file])
 
-    def set_color(self, row, file, new_color):
+    def set_color(self, row: int, file: int, new_color: piece.Color) -> None:
         """
         Sets color of piece at row and file to color
         """
@@ -136,7 +198,7 @@ class Board():
 
         self.color[(row * 8) + file] = new_color.value
 
-    def teleport_piece(self, row, file, new_row, new_file):
+    def teleport_piece(self, row: int, file: int, new_row: int, new_file: int) -> None:
         """
         Teleports piece from row and file to new_row and new_file
         while ignoring all chess rules
@@ -150,14 +212,14 @@ class Board():
         )
         self.set_piece(row, file, piece.Type.NONE, piece.Color.NONE)
 
-    def move_piece(self, row, file, new_row, new_file):
+    def move_piece(self, row: int, file: int, new_row: int, new_file: int) -> bool:
         """
         Moves piece from row and file to new_row and new_file
         according to chess rules
         Returns 1 if move was legal, 0 otherwise
         """
 
-        result = 0
+        result = False
         found_en_passant = False
 
         current_piece = self.get_piece(row, file)
@@ -198,7 +260,7 @@ class Board():
                 elif current_piece == piece.Type.ROOK and file == 7:
                     castle_info[2] = 1
 
-                result = 1
+                result = True
                 break
 
         self.en_passant_valid = (result == 1 and found_en_passant)
@@ -207,7 +269,11 @@ class Board():
 
         return result
 
-    def handle_en_passant(self, row, new_row, new_file, current_piece):
+    def handle_en_passant(self,
+                          row: int,
+                          new_row: int,
+                          new_file: int,
+                          current_piece: piece.Type) -> bool:
         """
         Subroutine of move_piece
         Checks all piece related things considering en passant
@@ -240,7 +306,7 @@ class Board():
 
         return False
 
-    def copy(self):
+    def copy(self) -> tuple[list[int], list[int]]:
         """
         Returns a copy of board and color arrays
         """

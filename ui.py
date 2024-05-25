@@ -3,10 +3,12 @@
 Holds the UI class
 """
 
+import typing
 import tkinter as tk
 from PIL import Image, ImageTk
 
 import piece
+from exceptions import InconsistentState
 
 
 class UI():
@@ -14,14 +16,15 @@ class UI():
     Icarus user interface
     """
 
-    root = None
-    canvas = None
-    board = None
+    root: tk.Tk
+    canvas: tk.Canvas
+    board: typing.Any
+    fen_text: tk.StringVar
 
     title = "Icarus"
-    white_color = "#9f90b0"
-    black_color = "#7d4a8d"
-    select_color = "#0000ff"
+    white_color = "#7c6f64"
+    black_color = "#665c54"
+    select_color = "#458588"
 
     square_width = 80
     square_height = 80
@@ -31,29 +34,92 @@ class UI():
 
     piece_images: list[ImageTk.PhotoImage] = []
 
-    def init(self, board):
+    def init(self, board: typing.Any) -> None:
         """
         Initializes a tkinter window
         """
 
+        # TODO - clean up ui code
+
         self.root = tk.Tk()
+        self.root["bg"] = "#262626"
         self.root.title(self.title)
 
         self.canvas = tk.Canvas(width=self.square_width * 8, height=self.square_height * 8)
-        self.canvas.pack()
+        self.canvas.config(highlightthickness=0)
 
         self.board = board
         self.root.bind("<Button 1>", self.click_square)
 
+        clicked = tk.StringVar()
+        clicked.set("Board Setup")
+        settings_dropdown = tk.OptionMenu(
+            self.root,
+            clicked,
+            "Board Setup"
+        )
+        settings_dropdown.config(
+            bg="#4e4e4e",
+            fg="#ebdbb2",
+            borderwidth=0,
+            width=20,
+            highlightthickness=0,
+            activebackground="#ebdbb2",
+            activeforeground="#4e4e4e",
+            font=("Monospace Regular", 12)
+        )
+        settings_dropdown["menu"].config(
+            bg="#4e4e4e",
+            fg="#ebdbb2",
+            borderwidth=0,
+            activebackground="#ebdbb2",
+            activeforeground="#4e4e4e",
+            font=("Monospace Regular", 12)
+        )
+
+        # Board setup frame
+        board_setup_frame = tk.Frame(self.root)
+        self.fen_text = tk.StringVar(value="hi")
+        fen_entry_box = tk.Entry(board_setup_frame, textvariable=self.fen_text)
+        load_fen_button = tk.Button(
+            board_setup_frame,
+            text="Load FEN",
+            command=self.handle_load_fen_button
+        )
+        load_fen_button.config(
+            bg="#4e4e4e",
+            fg="#ebdbb2",
+            borderwidth=0,
+            highlightthickness=0,
+            activebackground="#ebdbb2",
+            activeforeground="#4e4e4e",
+            font=("Monospace Regular", 12)
+        )
+        fen_entry_box.config(
+            bg="#4e4e4e",
+            fg="#ebdbb2",
+            borderwidth=0,
+            highlightthickness=0,
+            font=("Monospace Regular", 12),
+        )
+
+        # Create the UI
+        self.canvas.grid(row=0, rowspan=2, column=0)
+        settings_dropdown.grid(row=0, column=1, sticky="n")
+        board_setup_frame.grid(row=1, column=1, sticky="new")
+        fen_entry_box.pack(anchor="n", fill="x")
+        load_fen_button.pack(anchor="n", fill="x")
+
         self.load_piece_images()
         self.update()
 
-    def update(self):
+    def update(self) -> None:
         """
         Draws all pieces to the current UI
         """
 
         self.canvas.delete("all")
+        self.fen_text.set(self.board.board_to_fen())
 
         for row in range(0, 8):
             for file in range(0, 8):
@@ -69,24 +135,33 @@ class UI():
                 x = file * self.square_width
                 y = row * self.square_height
 
+                # Create the background square
                 self.canvas.create_rectangle(
                     (x, y),
                     (x + self.square_height, y + self.square_width),
                     fill=color
                 )
 
+                # Draw the piece
                 if self.board.get_color(7 - row, file) != piece.Color.NONE:
+                    current_piece = self.board.get_piece(7 - row, file)
+                    current_color = self.board.get_color(7 - row, file)
+
+                    if current_piece.value == 0 and current_color.value != 0:
+                        raise InconsistentState("Piece is NONE but color is set")
+                    if current_piece.value != 0 and current_color.value == 0:
+                        raise InconsistentState("Color is NONE but piece is set")
+
                     self.canvas.create_image(
                         x,
                         y,
                         anchor=tk.NW,
-                        image=self.get_piece_image(
-                            self.board.get_piece(7 - row, file),
-                            self.board.get_color(7 - row, file)
-                        )
+                        image=self.get_piece_image(current_piece, current_color)
                     )
 
-    def get_piece_image(self, current_piece, current_color):
+    def get_piece_image(self,
+                        current_piece: piece.Type,
+                        current_color: piece.Color) -> ImageTk.PhotoImage | None:
         """
         Gets the corresponding image to a piece of color
         """
@@ -99,7 +174,7 @@ class UI():
 
         return None
 
-    def load_piece_images(self):
+    def load_piece_images(self) -> None:
         """
         Pre-loads alls piece images into memory
         """
@@ -117,7 +192,7 @@ class UI():
         self.piece_images.append(self.load_piece_image("b_b"))
         self.piece_images.append(self.load_piece_image("b_n"))
 
-    def load_piece_image(self, name):
+    def load_piece_image(self, name: str) -> ImageTk.PhotoImage:
         """
         Loads a single piece image from resources/pieces/ into memory
         """
@@ -128,9 +203,11 @@ class UI():
             ).convert("RGBA")
         )
 
-    def click_square(self, event_origin):
+    def click_square(self, event_origin: typing.Any) -> None:
         """
         Handles mous click event
+
+        event_origin is a tkinter event
         """
 
         # NOTE - required since pylint does not like unused vars
@@ -163,7 +240,7 @@ class UI():
 
             self.update()
 
-    def get_square(self):
+    def get_square(self) -> tuple[int, int]:
         """
         Turns x and y of mouse click into row and file
         """
@@ -176,9 +253,17 @@ class UI():
 
         return row, file
 
-    def keep_alive(self):
+    def keep_alive(self) -> None:
         """
         Runs the mainloop of the root window
         """
 
         self.root.mainloop()
+
+    def handle_load_fen_button(self) -> None:
+        """
+        Called when the "Load FEN" button is pressed
+        """
+
+        self.board.load_fen(self.fen_text.get())
+        self.update()
