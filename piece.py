@@ -8,8 +8,6 @@ import typing
 import board as b
 import position
 
-# TODO - replace typing.Any notations with proper typing
-
 
 class Color(Enum):
     """
@@ -280,7 +278,7 @@ def get_line_move(row: int, file: int, direction: list[int], board: typing.Any) 
     return valid_moves
 
 
-def get_all_moves(color: typing.Any, board: typing.Any) -> tuple[list[list[int]], bool]:
+def get_all_moves(color: Color, board: typing.Any) -> tuple[list[list[int]], bool]:
     """
     Returns all valid moves for all pieces of a certain color
     Returns 2d array of rows and files: [ [row,file], ... ]

@@ -5,3 +5,4 @@ echo -:- Pylint -:-
 pylint *.py
 echo -:- MyPy -:-
 mypy --strict --disallow-untyped-defs --disallow-incomplete-defs --disallow-any-generics *.py
+mypy --strict --disallow-untyped-defs --disallow-incomplete-defs --disallow-any-generics */*.py
