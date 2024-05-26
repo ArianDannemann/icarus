@@ -21,13 +21,14 @@ class UI():
     board: typing.Any
     fen_text: tk.StringVar
 
-    title = "Icarus"
-    white_color = "#7c6f64"
-    black_color = "#665c54"
-    select_color = "#458588"
+    title: str = "Icarus"
+    white_color: str = "#7c6f64"
+    black_color: str = "#665c54"
+    select_color: str = "#458588"
+    flipped: bool = False
 
-    square_width = 80
-    square_height = 80
+    square_width: int = 80
+    square_height: int = 80
 
     selected_piece: list[int] = [-1, -1]
     selected_moves: list[list[int]] = []
@@ -101,8 +102,10 @@ class UI():
 
         # Board setup frame
         board_setup_frame = tk.Frame(self.root)
-        self.fen_text = tk.StringVar(value="hi")
+
+        self.fen_text = tk.StringVar(value="unset")
         fen_entry_box = tk.Entry(board_setup_frame, textvariable=self.fen_text)
+
         load_fen_button = tk.Button(
             board_setup_frame,
             text="Load FEN",
@@ -117,6 +120,7 @@ class UI():
             activeforeground="#4e4e4e",
             font=("Monospace Regular", 12)
         )
+
         fen_entry_box.config(
             bg="#4e4e4e",
             fg="#ebdbb2",
@@ -125,9 +129,25 @@ class UI():
             font=("Monospace Regular", 12),
         )
 
+        flip_board_button = tk.Button(
+            board_setup_frame,
+            text="Flip board",
+            command=self.handle_flip_board_button
+        )
+        flip_board_button.config(
+            bg="#4e4e4e",
+            fg="#ebdbb2",
+            borderwidth=0,
+            highlightthickness=0,
+            activebackground="#ebdbb2",
+            activeforeground="#4e4e4e",
+            font=("Monospace Regular", 12)
+        )
+
         board_setup_frame.grid(row=1, column=1, sticky="new")
         fen_entry_box.pack(anchor="n", fill="x")
         load_fen_button.pack(anchor="n", fill="x")
+        flip_board_button.pack(anchor="n", fill="x")
 
     def update(self) -> None:
         """
@@ -142,9 +162,13 @@ class UI():
 
                 color = self.white_color if (row + file) % 2 == 0 else self.black_color
 
+                # Take the flipped board into account
+                display_row = 7 - row if not self.flipped else row
+                display_file = file if not self.flipped else 7 - file
+
                 # Check if square is movable
                 for selected_move in self.selected_moves:
-                    if selected_move[0] == 7 - row and selected_move[1] == file:
+                    if selected_move[0] == display_row and selected_move[1] == display_file:
 
                         color = self.select_color
 
@@ -159,9 +183,9 @@ class UI():
                 )
 
                 # Draw the piece
-                if self.board.get_color(7 - row, file) != piece.Color.NONE:
-                    current_piece = self.board.get_piece(7 - row, file)
-                    current_color = self.board.get_color(7 - row, file)
+                if self.board.get_color(display_row, display_file) != piece.Color.NONE:
+                    current_piece = self.board.get_piece(display_row, display_file)
+                    current_color = self.board.get_color(display_row, display_file)
 
                     if current_piece.value == 0 and current_color.value != 0:
                         raise InconsistentState("Piece is NONE but color is set")
@@ -233,6 +257,10 @@ class UI():
 
         row, file = self.get_square()
 
+        # Take flipped board into consideration
+        row = row if not self.flipped else 7 - row
+        file = file if not self.flipped else 7 - file
+
         current_piece = self.board.get_piece(row, file)
 
         if self.selected_piece[0] != -1:
@@ -282,4 +310,12 @@ class UI():
         """
 
         self.board.load_fen(self.fen_text.get())
+        self.update()
+
+    def handle_flip_board_button(self) -> None:
+        """
+        Called when the "Flip board" button is pressed
+        """
+
+        self.flipped = not self.flipped
         self.update()
