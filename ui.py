@@ -39,17 +39,32 @@ class UI():
         Initializes a tkinter window
         """
 
-        # TODO - clean up ui code
-
+        # Setup TK root
         self.root = tk.Tk()
         self.root["bg"] = "#262626"
         self.root.title(self.title)
 
+        # Create the board canvas and bind left click
         self.canvas = tk.Canvas(width=self.square_width * 8, height=self.square_height * 8)
         self.canvas.config(highlightthickness=0)
-
         self.board = board
         self.root.bind("<Button 1>", self.click_square)
+
+        # Create the UI
+        self.canvas.grid(row=0, rowspan=2, column=0)
+
+        # Load the first frame to the right of the board
+        self.load_setup_board_frame()
+        self.load_settings_choose_frame()
+
+        # Start loading the board and pieces themself
+        self.load_piece_images()
+        self.update()
+
+    def load_settings_choose_frame(self) -> None:
+        """
+        Loads and displays the "choose settings" page
+        """
 
         clicked = tk.StringVar()
         clicked.set("Board Setup")
@@ -77,6 +92,13 @@ class UI():
             font=("Monospace Regular", 12)
         )
 
+        settings_dropdown.grid(row=0, column=1, sticky="n")
+
+    def load_setup_board_frame(self) -> None:
+        """
+        Loads and displays the setup board settings page
+        """
+
         # Board setup frame
         board_setup_frame = tk.Frame(self.root)
         self.fen_text = tk.StringVar(value="hi")
@@ -103,15 +125,9 @@ class UI():
             font=("Monospace Regular", 12),
         )
 
-        # Create the UI
-        self.canvas.grid(row=0, rowspan=2, column=0)
-        settings_dropdown.grid(row=0, column=1, sticky="n")
         board_setup_frame.grid(row=1, column=1, sticky="new")
         fen_entry_box.pack(anchor="n", fill="x")
         load_fen_button.pack(anchor="n", fill="x")
-
-        self.load_piece_images()
-        self.update()
 
     def update(self) -> None:
         """

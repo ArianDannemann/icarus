@@ -105,9 +105,6 @@ class Board():
         row = 7
         file = 0
 
-        # TODO - create functions that convert pieces to chars
-        # TODO - check for invalid input
-
         # Clear the board
         self.board = [0] * 64
         self.color = [0] * 64
