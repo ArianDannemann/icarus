@@ -26,6 +26,9 @@ class Board():
 
     promotion_target = piece.Type.NONE
 
+    active_color: piece.Color = piece.Color.WHITE
+    active_turn: int = 0
+
     def setup(self) -> None:
         """
         Sets up the default chess position
@@ -222,6 +225,9 @@ class Board():
         current_piece = self.get_piece(row, file)
         current_color = self.get_color(row, file)
 
+        if current_color != self.active_color:
+            return False
+
         for valid_move in piece.get_valid_moves(row, file, True, self):
             if position.equals(valid_move, [new_row, new_file]):
 
@@ -258,6 +264,10 @@ class Board():
                     castle_info[2] = 1
 
                 result = True
+                self.active_color = (piece.Color.WHITE
+                        if self.active_color == piece.Color.BLACK
+                        else piece.Color.BLACK)
+                self.active_turn += 1
                 break
 
         self.en_passant_valid = (result == 1 and found_en_passant)
@@ -283,7 +293,6 @@ class Board():
             and position.equals(self.en_passant_target, [new_row, new_file])
             and self.en_passant_valid
         ):
-            print("en passant")
             self.set_piece(
                 self.en_passant_victim[0],
                 self.en_passant_victim[1],

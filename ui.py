@@ -19,7 +19,11 @@ class UI():
     root: tk.Tk
     canvas: tk.Canvas
     board: typing.Any
+    board_setup_frame: tk.Frame
+    game_info_frame: tk.Frame
     fen_text: tk.StringVar
+    move_count_text: tk.Label
+    whos_turn_text: tk.Label
 
     title: str = "Icarus"
     white_color: str = "#7c6f64"
@@ -58,6 +62,10 @@ class UI():
         self.load_setup_board_frame()
         self.load_settings_choose_frame()
 
+        # Prepare the other menus
+        self.load_game_info_frame()
+        self.game_info_frame.destroy()
+
         # Start loading the board and pieces themself
         self.load_piece_images()
         self.update()
@@ -68,11 +76,13 @@ class UI():
         """
 
         clicked = tk.StringVar()
-        clicked.set("Board Setup")
+        clicked.set("Board setup")
         settings_dropdown = tk.OptionMenu(
             self.root,
             clicked,
-            "Board Setup"
+            "Board setup",
+            "Game info",
+            command=self.handle_settings_dropdown
         )
         settings_dropdown.config(
             bg="#4e4e4e",
@@ -101,13 +111,13 @@ class UI():
         """
 
         # Board setup frame
-        board_setup_frame = tk.Frame(self.root)
+        self.board_setup_frame = tk.Frame(self.root)
 
         self.fen_text = tk.StringVar(value="unset")
-        fen_entry_box = tk.Entry(board_setup_frame, textvariable=self.fen_text)
+        fen_entry_box = tk.Entry(self.board_setup_frame, textvariable=self.fen_text)
 
         load_fen_button = tk.Button(
-            board_setup_frame,
+            self.board_setup_frame,
             text="Load FEN",
             command=self.handle_load_fen_button
         )
@@ -130,7 +140,7 @@ class UI():
         )
 
         flip_board_button = tk.Button(
-            board_setup_frame,
+            self.board_setup_frame,
             text="Flip board",
             command=self.handle_flip_board_button
         )
@@ -144,10 +154,40 @@ class UI():
             font=("Monospace Regular", 12)
         )
 
-        board_setup_frame.grid(row=1, column=1, sticky="new")
+        self.board_setup_frame.grid(row=1, column=1, sticky="new")
         fen_entry_box.pack(anchor="n", fill="x")
         load_fen_button.pack(anchor="n", fill="x")
         flip_board_button.pack(anchor="n", fill="x")
+
+    def load_game_info_frame(self) -> None:
+        """
+        Loads and displays the game info settings page
+        """
+
+        # Board setup frame
+        self.game_info_frame = tk.Frame(self.root)
+
+        self.move_count_text = tk.Label(self.game_info_frame, text="Turn 0")
+        self.whos_turn_text = tk.Label(self.game_info_frame, text="WHITE has the turn")
+
+        self.move_count_text.config(
+            bg="#262626",
+            fg="#ebdbb2",
+            borderwidth=0,
+            highlightthickness=0,
+            font=("Monospace Regular", 12)
+        )
+        self.whos_turn_text.config(
+            bg="#262627",
+            fg="#ebdbb2",
+            borderwidth=0,
+            highlightthickness=0,
+            font=("Monospace Regular", 12)
+        )
+
+        self.game_info_frame.grid(row=1, column=1, sticky="new")
+        self.whos_turn_text.pack(anchor="n", fill="x")
+        self.move_count_text.pack(anchor="n", fill="x")
 
     def update(self) -> None:
         """
@@ -156,6 +196,10 @@ class UI():
 
         self.canvas.delete("all")
         self.fen_text.set(self.board.board_to_fen())
+
+        if self.game_info_frame.winfo_exists() == 1:
+            self.whos_turn_text.config(text=f"{self.board.active_color.name} has the turn")
+            self.move_count_text.config(text=f"Turn {int(self.board.active_turn/2)}")
 
         for row in range(0, 8):
             for file in range(0, 8):
@@ -318,4 +362,19 @@ class UI():
         """
 
         self.flipped = not self.flipped
+        self.update()
+
+    def handle_settings_dropdown(self, event: typing.Any) -> None:
+        """
+        Called when something was selected from the settings dropdown
+        """
+
+        self.board_setup_frame.destroy()
+        self.game_info_frame.destroy()
+
+        if event == "Board setup":
+            self.load_setup_board_frame()
+        elif event == "Game info":
+            self.load_game_info_frame()
+
         self.update()
