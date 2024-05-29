@@ -94,7 +94,7 @@ def get_valid_moves(row: int, file: int, simulate: bool, board: typing.Any) -> l
                 valid_move[1]
             )
 
-            _, result = get_all_moves(other_color, copied_board)
+            _, result = get_all_moves(other_color, copied_board, False)
 
             if result:
                 valid_moves.pop(i)
@@ -174,7 +174,7 @@ def get_king_moves(row: int,
     #        since we dont castle in simulation (we cant take the king through castles)
     # Check for castling
     if not castle_info[0] and can_castle:
-        enemy_moves, in_check = get_all_moves(enemy_color, board)
+        enemy_moves, in_check = get_all_moves(enemy_color, board, False)
 
         if in_check:
             return valid_moves
@@ -229,9 +229,13 @@ def get_pawn_moves(row: int, file: int, board: typing.Any) -> list[list[int]]:
         valid_moves.append(attack_right)
 
     # En passant
-    if position.equals(board.en_passant_target, attack_left):
+    if (position.equals(board.en_passant_target, attack_left)
+            and (board.get_color(board.en_passant_target[0], board.en_passant_target[1])
+            not in (color, Color.NONE))):
         valid_moves.append(board.en_passant_target)
-    if position.equals(board.en_passant_target, attack_right):
+    if (position.equals(board.en_passant_target, attack_right)
+            and (board.get_color(board.en_passant_target[0], board.en_passant_target[1])
+            not in (color, Color.NONE))):
         valid_moves.append(board.en_passant_target)
 
     # Remove moves that are now withing the bounds of the board
@@ -278,7 +282,7 @@ def get_line_move(row: int, file: int, direction: list[int], board: typing.Any) 
     return valid_moves
 
 
-def get_all_moves(color: Color, board: typing.Any) -> tuple[list[list[int]], bool]:
+def get_all_moves(color: Color, board: typing.Any, simulate: bool) -> tuple[list[list[int]], bool]:
     """
     Returns all valid moves for all pieces of a certain color
     Returns 2d array of rows and files: [ [row,file], ... ]
@@ -297,7 +301,7 @@ def get_all_moves(color: Color, board: typing.Any) -> tuple[list[list[int]], boo
             if board.get_color(row, file) != color:
                 continue
 
-            piece_moves = get_valid_moves(row, file, False, board)
+            piece_moves = get_valid_moves(row, file, simulate, board)
             valid_moves.extend(piece_moves)
 
             # Check if we are checking the king
