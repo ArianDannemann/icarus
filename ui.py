@@ -25,6 +25,7 @@ class UI():
     move_count_text: tk.Label
     whos_turn_text: tk.Label
     state_text: tk.Label
+    promotion_piece_text: tk.StringVar
 
     title: str = "Icarus"
     white_color: str = "#7c6f64"
@@ -60,12 +61,12 @@ class UI():
         self.canvas.grid(row=0, rowspan=2, column=0)
 
         # Load the first frame to the right of the board
-        self.load_setup_board_frame()
         self.load_settings_choose_frame()
+        self.load_game_info_frame()
 
         # Prepare the other menus
-        self.load_game_info_frame()
-        self.game_info_frame.destroy()
+        self.load_setup_board_frame()
+        self.board_setup_frame.destroy()
 
         # Start loading the board and pieces themself
         self.load_piece_images()
@@ -77,7 +78,7 @@ class UI():
         """
 
         clicked = tk.StringVar()
-        clicked.set("Board setup")
+        clicked.set("Game info")
         settings_dropdown = tk.OptionMenu(
             self.root,
             clicked,
@@ -194,11 +195,41 @@ class UI():
             font=("Monospace Regular", 12)
         )
 
+        clicked = tk.StringVar()
+        clicked.set("QUEEN")
+        promotion_piece_dropdown = tk.OptionMenu(
+            self.game_info_frame,
+            clicked,
+            "QUEEN",
+            "ROOK",
+            "KNIGHT",
+            "BISHOP",
+            command=self.handle_promotion_piece_dropdown
+        )
+        promotion_piece_dropdown.config(
+            bg="#4e4e4e",
+            fg="#ebdbb2",
+            borderwidth=0,
+            width=20,
+            highlightthickness=0,
+            activebackground="#ebdbb2",
+            activeforeground="#4e4e4e",
+            font=("Monospace Regular", 12)
+        )
+        promotion_piece_dropdown["menu"].config(
+            bg="#4e4e4e",
+            fg="#ebdbb2",
+            borderwidth=0,
+            activebackground="#ebdbb2",
+            activeforeground="#4e4e4e",
+            font=("Monospace Regular", 12)
+        )
 
         self.game_info_frame.grid(row=1, column=1, sticky="new")
         self.whos_turn_text.pack(anchor="n", fill="x")
         self.move_count_text.pack(anchor="n", fill="x")
         self.state_text.pack(anchor="n", fill="x")
+        promotion_piece_dropdown.pack()
 
     def update(self) -> None:
         """
@@ -395,3 +426,10 @@ class UI():
             self.load_game_info_frame()
 
         self.update()
+
+    def handle_promotion_piece_dropdown(self, event: typing.Any) -> None:
+        """
+        Called when a promotion piece was selected from the promotion piece dropdown
+        """
+
+        self.board.promotion_target = piece.Type[event]
