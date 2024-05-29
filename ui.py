@@ -24,6 +24,7 @@ class UI():
     fen_text: tk.StringVar
     move_count_text: tk.Label
     whos_turn_text: tk.Label
+    state_text: tk.Label
 
     title: str = "Icarus"
     white_color: str = "#7c6f64"
@@ -169,6 +170,7 @@ class UI():
 
         self.move_count_text = tk.Label(self.game_info_frame, text="Turn 0")
         self.whos_turn_text = tk.Label(self.game_info_frame, text="WHITE has the turn")
+        self.state_text = tk.Label(self.game_info_frame, text="Game still running")
 
         self.move_count_text.config(
             bg="#262626",
@@ -184,10 +186,19 @@ class UI():
             highlightthickness=0,
             font=("Monospace Regular", 12)
         )
+        self.state_text.config(
+            bg="#262627",
+            fg="#ebdbb2",
+            borderwidth=0,
+            highlightthickness=0,
+            font=("Monospace Regular", 12)
+        )
+
 
         self.game_info_frame.grid(row=1, column=1, sticky="new")
         self.whos_turn_text.pack(anchor="n", fill="x")
         self.move_count_text.pack(anchor="n", fill="x")
+        self.state_text.pack(anchor="n", fill="x")
 
     def update(self) -> None:
         """
@@ -200,6 +211,12 @@ class UI():
         if self.game_info_frame.winfo_exists() == 1:
             self.whos_turn_text.config(text=f"{self.board.active_color.name} has the turn")
             self.move_count_text.config(text=f"Turn {int(self.board.active_turn/2)}")
+
+            if self.board.game_over:
+                if self.board.color_checkmated != piece.Color.NONE:
+                    self.state_text.config(text=f"{self.board.color_checkmated.name} lost!")
+                else:
+                    self.state_text.config(text="Its a draw!")
 
         for row in range(0, 8):
             for file in range(0, 8):

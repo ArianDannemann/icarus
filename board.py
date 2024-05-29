@@ -5,7 +5,6 @@ Hold the class Board
 import piece
 import position
 
-
 class Board():
     """
     Handles piece positioning and moving on a board
@@ -28,6 +27,8 @@ class Board():
 
     active_color: piece.Color = piece.Color.WHITE
     active_turn: int = 0
+    color_checkmated: piece.Color = piece.Color.NONE
+    game_over: bool = False
 
     def setup(self) -> None:
         """
@@ -263,11 +264,22 @@ class Board():
                 elif current_piece == piece.Type.ROOK and file == 7:
                     castle_info[2] = 1
 
+                # Update game information
                 result = True
+                other_color = self.active_color
                 self.active_color = (piece.Color.WHITE
                         if self.active_color == piece.Color.BLACK
                         else piece.Color.BLACK)
                 self.active_turn += 1
+
+                # Check if somebody was mated
+                num_turns, _ = piece.get_all_moves(self.active_color, self, True)
+                _, in_check = piece.get_all_moves(other_color, self, True)
+                if len(num_turns) == 0 and in_check:
+                    self.game_over = True
+                    self.color_checkmated = self.active_color
+                elif len(num_turns) == 0 and not in_check:
+                    self.game_over = True
                 break
 
         self.en_passant_valid = (result == 1 and found_en_passant)
