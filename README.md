@@ -10,6 +10,12 @@
 
 Simple python chess application with UI
 
+## Screenshots
+
+<p align="center">
+  <img src="logo/icarus-v1.0.0.png" title="Screenshot" atl="logo">
+</p>
+
 ## Usage
 
 You can setup a board with UI like this:
