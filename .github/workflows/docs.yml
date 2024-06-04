@@ -1,31 +1,31 @@
 name: Docs
-
-on: [push]
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   build:
+    name: Deploy docs
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.11.9"]
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pylint
-        pip install Pillow
-        pip install mypy
-        sudo apt install mkdocs
-        pip install mkdocs-material
-    - name: Configure Git
-      run: |
-        echo ${{ secrets.AUTH_KEY }} | base64
-    - name: Publishing docs
-      run: |
-        cd docs
-        mkdocs gh-deploy ${{ secrets.PAT }}
+      - name: Checkout main
+        uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pylint
+          pip install Pillow
+          pip install mypy
+          sudo apt install mkdocs
+          pip install mkdocs-material
+      - name: Deploy docs
+        uses: mhausenblas/mkdocs-deploy-gh-pages@master
+        env:
+          PERSONAL_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+          CONFIG_FILE: docs/mkdocs.yml
+          EXTRA_PACKAGES: build-base
