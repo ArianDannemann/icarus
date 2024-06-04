@@ -1,3 +1,3 @@
 # Icarus chess
 
-Welcome to Icarus, a simple python chess UI!
+Welcome to Icarus, a simple python chess UI! :)
