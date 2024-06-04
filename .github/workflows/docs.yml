@@ -27,5 +27,5 @@ jobs:
         uses: mhausenblas/mkdocs-deploy-gh-pages@master
         env:
           PERSONAL_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
-          CONFIG_FILE: docs/mkdocs.yml
+          CONFIG_FILE: ./docs/mkdocs.yml
           EXTRA_PACKAGES: build-base
