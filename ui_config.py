@@ -5,7 +5,7 @@ Stores settings and references for the UI
 
 import tkinter as tk
 
-title: str = "Icarus - v1.0.1"
+title: str = "Icarus - v1.0.2"
 white_color: str = "#7c6f64"
 black_color: str = "#665c54"
 select_color: str = "#458588"

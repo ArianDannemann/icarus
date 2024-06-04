@@ -1,0 +1,8 @@
+site_name: Icarus v1.0.2
+theme: material
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
