@@ -4,6 +4,8 @@ Hold the class Board
 
 import piece
 import position
+import board_config
+
 
 class Board():
     """
@@ -24,11 +26,6 @@ class Board():
     black_castle_info = [0, 0, 0]
 
     promotion_target = piece.Type.QUEEN
-
-    active_color: piece.Color = piece.Color.WHITE
-    active_turn: int = 0
-    color_checkmated: piece.Color = piece.Color.NONE
-    game_over: bool = False
 
     def setup(self) -> None:
         """
@@ -226,7 +223,7 @@ class Board():
         current_piece = self.get_piece(row, file)
         current_color = self.get_color(row, file)
 
-        if current_color != self.active_color:
+        if current_color != board_config.active_color:
             return False
 
         for valid_move in piece.get_valid_moves(row, file, True, self):
@@ -234,7 +231,12 @@ class Board():
 
                 self.teleport_piece(row, file, new_row, new_file)
 
-                found_en_passant = self.handle_en_passant(row, new_row, new_file, current_piece)
+                found_en_passant = self.handle_en_passant(
+                    row,
+                    new_row,
+                    new_file,
+                    current_piece
+                )
 
                 # Check for promotion
                 if (current_piece == piece.Type.PAWN and new_row in [0, 7]):
@@ -266,20 +268,17 @@ class Board():
 
                 # Update game information
                 result = True
-                other_color = self.active_color
-                self.active_color = (piece.Color.WHITE
-                        if self.active_color == piece.Color.BLACK
-                        else piece.Color.BLACK)
-                self.active_turn += 1
+                enemy_color = board_config.active_color
+                board_config.active_color = (
+                    piece.Color.WHITE
+                    if board_config.active_color == piece.Color.BLACK
+                    else piece.Color.BLACK
+                )
+                board_config.active_turn += 1
 
-                # Check if somebody was mated
-                num_turns, _ = piece.get_all_moves(self.active_color, self, True)
-                _, in_check = piece.get_all_moves(other_color, self, True)
-                if len(num_turns) == 0 and in_check:
-                    self.game_over = True
-                    self.color_checkmated = self.active_color
-                elif len(num_turns) == 0 and not in_check:
-                    self.game_over = True
+                # Check for mate
+                self.check_for_mate(enemy_color)
+
                 break
 
         self.en_passant_valid = (result == 1 and found_en_passant)
@@ -287,6 +286,21 @@ class Board():
             self.en_passant_target = [-1, -1]
 
         return result
+
+    def check_for_mate(self, enemy_color: piece.Color) -> None:
+        """
+        Checks for a mate on the current board and
+        updates board_config accordingly
+        """
+
+        num_turns, _ = piece.get_all_moves(board_config.active_color, self, True)
+        _, in_check = piece.get_all_moves(enemy_color, self, True)
+
+        if len(num_turns) == 0 and in_check:
+            board_config.game_over = True
+            board_config.color_checkmated = board_config.active_color
+        elif len(num_turns) == 0 and not in_check:
+            board_config.game_over = True
 
     def handle_en_passant(self,
                           row: int,

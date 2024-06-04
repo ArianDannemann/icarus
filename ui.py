@@ -8,6 +8,7 @@ from PIL import Image, ImageTk
 
 import piece
 import ui_config
+import board_config
 from exceptions import InconsistentState
 
 
@@ -230,12 +231,12 @@ class UI():
         ui_config.fen_text.set(self.board.board_to_fen())
 
         if ui_config.game_info_frame.winfo_exists() == 1:
-            ui_config.whos_turn_text.config(text=f"{self.board.active_color.name} has the turn")
-            ui_config.move_count_text.config(text=f"Turn {int(self.board.active_turn/2)}")
+            ui_config.whos_turn_text.config(text=f"{board_config.active_color.name} has the turn")
+            ui_config.move_count_text.config(text=f"Turn {int(board_config.active_turn/2)}")
 
-            if self.board.game_over:
-                if self.board.color_checkmated != piece.Color.NONE:
-                    ui_config.state_text.config(text=f"{self.board.color_checkmated.name} lost!")
+            if board_config.game_over:
+                if board_config.color_checkmated != piece.Color.NONE:
+                    ui_config.state_text.config(text=f"{board_config.color_checkmated.name} lost!")
                 else:
                     ui_config.state_text.config(text="Its a draw!")
 

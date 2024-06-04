@@ -15,6 +15,7 @@ square_width: int = 80
 square_height: int = 80
 
 # --- REFERENCES ---
+
 board_setup_frame: tk.Frame
 game_info_frame: tk.Frame
 fen_text: tk.StringVar

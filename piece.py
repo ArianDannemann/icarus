@@ -229,13 +229,22 @@ def get_pawn_moves(row: int, file: int, board: typing.Any) -> list[list[int]]:
         valid_moves.append(attack_right)
 
     # En passant
-    if (position.equals(board.en_passant_target, attack_left)
-            and (board.get_color(board.en_passant_target[0], board.en_passant_target[1])
-            not in (color, Color.NONE))):
+    if (
+        position.equals(board.en_passant_target, attack_left)
+        and (board.get_color(
+            board.en_passant_target[0],
+            board.en_passant_target[1])
+            not in (color, Color.NONE))
+    ):
         valid_moves.append(board.en_passant_target)
-    if (position.equals(board.en_passant_target, attack_right)
-            and (board.get_color(board.en_passant_target[0], board.en_passant_target[1])
-            not in (color, Color.NONE))):
+
+    if (
+        position.equals(board.en_passant_target, attack_right)
+        and (board.get_color(
+            board.en_passant_target[0],
+            board.en_passant_target[1])
+            not in (color, Color.NONE))
+    ):
         valid_moves.append(board.en_passant_target)
 
     # Remove moves that are now withing the bounds of the board
