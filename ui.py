@@ -1,4 +1,3 @@
-
 """
 Holds the UI class
 """
@@ -8,6 +7,7 @@ import tkinter as tk
 from PIL import Image, ImageTk
 
 import piece
+import ui_config
 from exceptions import InconsistentState
 
 
@@ -19,22 +19,6 @@ class UI():
     root: tk.Tk
     canvas: tk.Canvas
     board: typing.Any
-    board_setup_frame: tk.Frame
-    game_info_frame: tk.Frame
-    fen_text: tk.StringVar
-    move_count_text: tk.Label
-    whos_turn_text: tk.Label
-    state_text: tk.Label
-    promotion_piece_text: tk.StringVar
-
-    title: str = "Icarus"
-    white_color: str = "#7c6f64"
-    black_color: str = "#665c54"
-    select_color: str = "#458588"
-    flipped: bool = False
-
-    square_width: int = 80
-    square_height: int = 80
 
     selected_piece: list[int] = [-1, -1]
     selected_moves: list[list[int]] = []
@@ -49,10 +33,13 @@ class UI():
         # Setup TK root
         self.root = tk.Tk()
         self.root["bg"] = "#262626"
-        self.root.title(self.title)
+        self.root.title(ui_config.title)
 
         # Create the board canvas and bind left click
-        self.canvas = tk.Canvas(width=self.square_width * 8, height=self.square_height * 8)
+        self.canvas = tk.Canvas(
+            width=ui_config.square_width * 8,
+            height=ui_config.square_height * 8
+        )
         self.canvas.config(highlightthickness=0)
         self.board = board
         self.root.bind("<Button 1>", self.click_square)
@@ -66,7 +53,7 @@ class UI():
 
         # Prepare the other menus
         self.load_setup_board_frame()
-        self.board_setup_frame.destroy()
+        ui_config.board_setup_frame.destroy()
 
         # Start loading the board and pieces themself
         self.load_piece_images()
@@ -113,13 +100,16 @@ class UI():
         """
 
         # Board setup frame
-        self.board_setup_frame = tk.Frame(self.root)
+        ui_config.board_setup_frame = tk.Frame(self.root)
 
-        self.fen_text = tk.StringVar(value="unset")
-        fen_entry_box = tk.Entry(self.board_setup_frame, textvariable=self.fen_text)
+        ui_config.fen_text = tk.StringVar(value="unset")
+        fen_entry_box = tk.Entry(
+            ui_config.board_setup_frame,
+            textvariable=ui_config.fen_text
+        )
 
         load_fen_button = tk.Button(
-            self.board_setup_frame,
+            ui_config.board_setup_frame,
             text="Load FEN",
             command=self.handle_load_fen_button
         )
@@ -142,7 +132,7 @@ class UI():
         )
 
         flip_board_button = tk.Button(
-            self.board_setup_frame,
+            ui_config.board_setup_frame,
             text="Flip board",
             command=self.handle_flip_board_button
         )
@@ -156,7 +146,7 @@ class UI():
             font=("Monospace Regular", 12)
         )
 
-        self.board_setup_frame.grid(row=1, column=1, sticky="new")
+        ui_config.board_setup_frame.grid(row=1, column=1, sticky="new")
         fen_entry_box.pack(anchor="n", fill="x")
         load_fen_button.pack(anchor="n", fill="x")
         flip_board_button.pack(anchor="n", fill="x")
@@ -167,27 +157,27 @@ class UI():
         """
 
         # Board setup frame
-        self.game_info_frame = tk.Frame(self.root)
+        ui_config.game_info_frame = tk.Frame(self.root)
 
-        self.move_count_text = tk.Label(self.game_info_frame, text="Turn 0")
-        self.whos_turn_text = tk.Label(self.game_info_frame, text="WHITE has the turn")
-        self.state_text = tk.Label(self.game_info_frame, text="Game still running")
+        ui_config.move_count_text = tk.Label(ui_config.game_info_frame, text="Turn 0")
+        ui_config.whos_turn_text = tk.Label(ui_config.game_info_frame, text="WHITE has the turn")
+        ui_config.state_text = tk.Label(ui_config.game_info_frame, text="Game still running")
 
-        self.move_count_text.config(
+        ui_config.move_count_text.config(
             bg="#262626",
             fg="#ebdbb2",
             borderwidth=0,
             highlightthickness=0,
             font=("Monospace Regular", 12)
         )
-        self.whos_turn_text.config(
+        ui_config.whos_turn_text.config(
             bg="#262627",
             fg="#ebdbb2",
             borderwidth=0,
             highlightthickness=0,
             font=("Monospace Regular", 12)
         )
-        self.state_text.config(
+        ui_config.state_text.config(
             bg="#262627",
             fg="#ebdbb2",
             borderwidth=0,
@@ -198,7 +188,7 @@ class UI():
         clicked = tk.StringVar()
         clicked.set("QUEEN")
         promotion_piece_dropdown = tk.OptionMenu(
-            self.game_info_frame,
+            ui_config.game_info_frame,
             clicked,
             "QUEEN",
             "ROOK",
@@ -225,10 +215,10 @@ class UI():
             font=("Monospace Regular", 12)
         )
 
-        self.game_info_frame.grid(row=1, column=1, sticky="new")
-        self.whos_turn_text.pack(anchor="n", fill="x")
-        self.move_count_text.pack(anchor="n", fill="x")
-        self.state_text.pack(anchor="n", fill="x")
+        ui_config.game_info_frame.grid(row=1, column=1, sticky="new")
+        ui_config.whos_turn_text.pack(anchor="n", fill="x")
+        ui_config.move_count_text.pack(anchor="n", fill="x")
+        ui_config.state_text.pack(anchor="n", fill="x")
         promotion_piece_dropdown.pack()
 
     def update(self) -> None:
@@ -237,40 +227,40 @@ class UI():
         """
 
         self.canvas.delete("all")
-        self.fen_text.set(self.board.board_to_fen())
+        ui_config.fen_text.set(self.board.board_to_fen())
 
-        if self.game_info_frame.winfo_exists() == 1:
-            self.whos_turn_text.config(text=f"{self.board.active_color.name} has the turn")
-            self.move_count_text.config(text=f"Turn {int(self.board.active_turn/2)}")
+        if ui_config.game_info_frame.winfo_exists() == 1:
+            ui_config.whos_turn_text.config(text=f"{self.board.active_color.name} has the turn")
+            ui_config.move_count_text.config(text=f"Turn {int(self.board.active_turn/2)}")
 
             if self.board.game_over:
                 if self.board.color_checkmated != piece.Color.NONE:
-                    self.state_text.config(text=f"{self.board.color_checkmated.name} lost!")
+                    ui_config.state_text.config(text=f"{self.board.color_checkmated.name} lost!")
                 else:
-                    self.state_text.config(text="Its a draw!")
+                    ui_config.state_text.config(text="Its a draw!")
 
         for row in range(0, 8):
             for file in range(0, 8):
 
-                color = self.white_color if (row + file) % 2 == 0 else self.black_color
+                color = ui_config.white_color if (row + file) % 2 == 0 else ui_config.black_color
 
                 # Take the flipped board into account
-                display_row = 7 - row if not self.flipped else row
-                display_file = file if not self.flipped else 7 - file
+                display_row = 7 - row if not ui_config.flipped else row
+                display_file = file if not ui_config.flipped else 7 - file
 
                 # Check if square is movable
                 for selected_move in self.selected_moves:
                     if selected_move[0] == display_row and selected_move[1] == display_file:
 
-                        color = self.select_color
+                        color = ui_config.select_color
 
-                x = file * self.square_width
-                y = row * self.square_height
+                x = file * ui_config.square_width
+                y = row * ui_config.square_height
 
                 # Create the background square
                 self.canvas.create_rectangle(
                     (x, y),
-                    (x + self.square_height, y + self.square_width),
+                    (x + ui_config.square_height, y + ui_config.square_width),
                     fill=color
                 )
 
@@ -331,7 +321,7 @@ class UI():
 
         return ImageTk.PhotoImage(
             Image.open(f"./resources/pieces/{name}.png").resize(
-                (self.square_width, self.square_height)
+                (ui_config.square_width, ui_config.square_height)
             ).convert("RGBA")
         )
 
@@ -350,8 +340,8 @@ class UI():
         row, file = self.get_square()
 
         # Take flipped board into consideration
-        row = row if not self.flipped else 7 - row
-        file = file if not self.flipped else 7 - file
+        row = row if not ui_config.flipped else 7 - row
+        file = file if not ui_config.flipped else 7 - file
 
         current_piece = self.board.get_piece(row, file)
 
@@ -384,8 +374,8 @@ class UI():
         x = self.root.winfo_pointerx() - self.root.winfo_rootx()
         y = self.root.winfo_pointery() - self.root.winfo_rooty()
 
-        row = 7 - int(y / self.square_height)
-        file = int(x / self.square_width)
+        row = 7 - int(y / ui_config.square_height)
+        file = int(x / ui_config.square_width)
 
         return row, file
 
@@ -401,7 +391,7 @@ class UI():
         Called when the "Load FEN" button is pressed
         """
 
-        self.board.load_fen(self.fen_text.get())
+        self.board.load_fen(ui_config.fen_text.get())
         self.update()
 
     def handle_flip_board_button(self) -> None:
@@ -409,7 +399,7 @@ class UI():
         Called when the "Flip board" button is pressed
         """
 
-        self.flipped = not self.flipped
+        ui_config.flipped = not ui_config.flipped
         self.update()
 
     def handle_settings_dropdown(self, event: typing.Any) -> None:
@@ -417,8 +407,8 @@ class UI():
         Called when something was selected from the settings dropdown
         """
 
-        self.board_setup_frame.destroy()
-        self.game_info_frame.destroy()
+        ui_config.board_setup_frame.destroy()
+        ui_config.game_info_frame.destroy()
 
         if event == "Board setup":
             self.load_setup_board_frame()

@@ -23,7 +23,7 @@ class Board():
     white_castle_info = [0, 0, 0]
     black_castle_info = [0, 0, 0]
 
-    promotion_target = piece.Type.NONE
+    promotion_target = piece.Type.QUEEN
 
     active_color: piece.Color = piece.Color.WHITE
     active_turn: int = 0
