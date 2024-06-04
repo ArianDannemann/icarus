@@ -20,7 +20,7 @@ jobs:
         pip install pylint
         pip install Pillow
         pip install mypy
-        apt install mkdocs
+        sudo apt install mkdocs
         pip install mkdocs-material
     - name: Publishing docs
       run: |
